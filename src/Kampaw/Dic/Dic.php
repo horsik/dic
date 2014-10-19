@@ -4,6 +4,7 @@ namespace Kampaw\Dic;
 
 use Kampaw\Dic\Exception\BadMethodCall;
 use Kampaw\Dic\Exception\CircularDependencyException;
+use Kampaw\Dic\Exception\InvalidArgumentException;
 use Kampaw\Dic\Exception\UnexpectedValueException;
 
 /**
@@ -109,31 +110,11 @@ class Dic implements DicInterface
      */
     public function injectDependencies($object)
     {
-        $reflection = new \ReflectionClass($object);
-
-        foreach ($reflection->getInterfaces() as $interface) {
-            if (strrpos($interface->name, 'AwareInterface')) {
-                foreach ($interface->getMethods() as $method) {
-                    if (!strncasecmp($method->name, 'set', 3)) {
-                        $args = array();
-                        foreach ($method->getParameters() as $parameter) {
-                            if ($class = $parameter->getClass()) {
-                                try {
-                                    $args[] = $this->getDependency($class->name);
-                                } catch (BadMethodCall $e) {
-                                    continue 2;
-                                }
-                            } else {
-                                throw new BadMethodCall("Invalid parameter {$parameter->name}");
-                            }
-                        }
-                        call_user_func_array(array($object, $method->name), $args);
-                    }
-                }
-            }
+        if (!is_object($object)) {
+            throw new InvalidArgumentException('Argument must be an object');
         }
 
-        return $object;
+        return $this->_injectDependencies($object, new \ReflectionClass($object));
     }
 
     /**
@@ -185,6 +166,38 @@ class Dic implements DicInterface
             }
         }
 
-        return $this->injectDependencies($reflection->newInstanceArgs($args));
+        return $this->_injectDependencies($reflection->newInstanceArgs($args), $reflection);
+    }
+
+    /**
+     * @param object $object
+     * @param \ReflectionClass $reflection
+     * @return object
+     */
+    protected function _injectDependencies($object, \ReflectionClass $reflection)
+    {
+        foreach ($reflection->getInterfaces() as $interface) {
+            if (strrpos($interface->name, 'AwareInterface')) {
+                foreach ($interface->getMethods() as $method) {
+                    if (!strncasecmp($method->name, 'set', 3)) {
+                        $args = array();
+                        foreach ($method->getParameters() as $parameter) {
+                            if ($class = $parameter->getClass()) {
+                                try {
+                                    $args[] = $this->getDependency($class->name);
+                                } catch (BadMethodCall $e) {
+                                    continue 2;
+                                }
+                            } else {
+                                throw new BadMethodCall("Invalid parameter {$parameter->name}");
+                            }
+                        }
+                        call_user_func_array(array($object, $method->name), $args);
+                    }
+                }
+            }
+        }
+
+        return $object;
     }
 }

@@ -499,4 +499,13 @@ class DicTest extends TestCase
         $this->dic->injectDependencies($mock);
 
     }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\InvalidArgumentException
+     */
+    public function InjectDependencies_InvalidArgument_ThrowsException()
+    {
+        $this->dic->injectDependencies(10);
+    }
 }
