@@ -6,6 +6,11 @@ use Kampaw\Dic\Exception\BadMethodCall;
 use Kampaw\Dic\Exception\CircularDependencyException;
 use Kampaw\Dic\Exception\UnexpectedValueException;
 
+/**
+ * Class Dic
+ *
+ * @package Kampaw\Dic
+ */
 class Dic implements DicInterface
 {
     /**
@@ -84,7 +89,7 @@ class Dic implements DicInterface
     {
         $this->dependencies = array();
 
-        return $this->getDependency($this->getCandidate($interface));
+        return $this->getDependency($interface);
     }
 
     /**
@@ -99,13 +104,49 @@ class Dic implements DicInterface
     }
 
     /**
-     * @param string $class
-     * @throws BadMethodCall
+     * @param object $object
      * @return object
      */
-    protected function getDependency($class)
+    public function injectDependencies($object)
     {
-        if ($class) {
+        $reflection = new \ReflectionClass($object);
+
+        foreach ($reflection->getInterfaces() as $interface) {
+            if (strrpos($interface->name, 'AwareInterface')) {
+                foreach ($interface->getMethods() as $method) {
+                    if (!strncasecmp($method->name, 'set', 3)) {
+                        $args = array();
+                        foreach ($method->getParameters() as $parameter) {
+                            if ($class = $parameter->getClass()) {
+                                try {
+                                    $args[] = $this->getDependency($class->name);
+                                } catch (BadMethodCall $e) {
+                                    continue 2;
+                                }
+                            } else {
+                                throw new BadMethodCall("Invalid parameter {$parameter->name}");
+                            }
+                        }
+                        call_user_func_array(array($object, $method->name), $args);
+                    }
+                }
+            }
+        }
+
+        return $object;
+    }
+
+    /**
+     * @param $interface
+     * @throws CircularDependencyException
+     * @return object
+     */
+    protected function getDependency($interface)
+    {
+        if ($class = $this->getCandidate($interface)) {
+            if (in_array($class, $this->dependencies)) {
+                throw new CircularDependencyException("Circular dependency $class");
+            }
             if (array_key_exists($class, $this->singletons)) {
                 if (!$singleton = &$this->singletons[$class]) {
                     $singleton = $this->createInstance($class);
@@ -115,7 +156,7 @@ class Dic implements DicInterface
                 return $this->createInstance($class);
             }
         } else {
-            throw new BadMethodCall("Cannot satisfy dependency $class");
+            throw new BadMethodCall("Cannot satisfy dependency $interface");
         }
     }
 
@@ -135,11 +176,7 @@ class Dic implements DicInterface
         if ($constructor = $reflection->getConstructor()) {
             foreach ($constructor->getParameters() as $parameter) {
                 if ($parameter->getClass()) {
-                    $candidate = $this->getCandidate($parameter->getClass()->getName());
-                    if (in_array($candidate, $this->dependencies)) {
-                        throw new CircularDependencyException("Circular dependency $candidate");
-                    }
-                    $args[] = $this->getDependency($candidate);
+                    $args[] = $this->getDependency($parameter->getClass()->name);
                 } elseif ($parameter->isDefaultValueAvailable()) {
                     $args[] = $parameter->getDefaultValue();
                 } elseif (!$parameter->isOptional()) {
@@ -148,6 +185,6 @@ class Dic implements DicInterface
             }
         }
 
-        return $reflection->newInstanceArgs($args);
+        return $this->injectDependencies($reflection->newInstanceArgs($args));
     }
 }

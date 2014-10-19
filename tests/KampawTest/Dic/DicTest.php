@@ -196,7 +196,7 @@ class DicTest extends TestCase
     /**
      * @test
      */
-    public function CreateInstance_StdClass_ReturnsStdClassInstance()
+    public function ResolveClass_StdClass_ReturnsStdClassInstance()
     {
         $result = $this->dic->resolveClass('stdClass');
 
@@ -207,7 +207,7 @@ class DicTest extends TestCase
      * @test
      * @expectedException \ReflectionException
      */
-    public function CreateInstance_InvalidClass_ThrowsException()
+    public function ResolveClass_InvalidClass_ThrowsException()
     {
         $this->dic->resolveClass('BogusClass');
     }
@@ -215,7 +215,7 @@ class DicTest extends TestCase
     /**
      * @test
      */
-    public function CreateInstance_InjectContainer_ReturnsObjectWithDicInjected()
+    public function ResolveClass_InjectContainer_ReturnsObjectWithDicInjected()
     {
         $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
         $result = $this->dic->resolveClass('KampawTest\Dic\TestAsset\ConstructorInjection\A');
@@ -227,7 +227,7 @@ class DicTest extends TestCase
      * @test
      * @expectedException \Kampaw\Dic\Exception\BadMethodCall
      */
-    public function CreateInstance_MissingDependency_ThrowsException()
+    public function ResolveClass_MissingDependency_ThrowsException()
     {
         $this->dic->resolveClass('KampawTest\Dic\TestAsset\ConstructorInjection\B');
     }
@@ -235,7 +235,7 @@ class DicTest extends TestCase
     /**
      * @test
      */
-    public function CreateInstance_ArgumentHasDefaultValue_DefaultValuePassed()
+    public function ResolveClass_ArgumentHasDefaultValue_DefaultValuePassed()
     {
         $result = $this->dic->resolveClass('KampawTest\Dic\TestAsset\ConstructorInjection\C');
 
@@ -246,7 +246,7 @@ class DicTest extends TestCase
      * @test
      * @expectedException \Kampaw\Dic\Exception\BadMethodCall
      */
-    public function CreateInstance_ArgumentIsClassWithoutInterface_ThrowsException()
+    public function ResolveClass_ArgumentIsClassWithoutInterface_ThrowsException()
     {
         $this->dic->resolveClass('KampawTest\Dic\TestAsset\ConstructorInjection\D');
     }
@@ -255,7 +255,7 @@ class DicTest extends TestCase
      * @test
      * @expectedException \Kampaw\Dic\Exception\BadMethodCall
      */
-    public function CreateInstance_ArgumentIsNotOptionalScalar_ThrowsException()
+    public function ResolveClass_ArgumentIsNotOptionalScalar_ThrowsException()
     {
         $this->dic->resolveClass('KampawTest\Dic\TestAsset\ConstructorInjection\E');
     }
@@ -263,7 +263,7 @@ class DicTest extends TestCase
     /**
      * @test
      */
-    public function CreateInstance_DependencyRequireDependency_EverythingSatified()
+    public function ResolveClass_DependencyRequireDependency_EverythingSatified()
     {
         $this->dic->register(
             'KampawTest\Dic\TestAsset\ConstructorInjection\X',
@@ -278,7 +278,7 @@ class DicTest extends TestCase
      * @test
      * @expectedException \Kampaw\Dic\Exception\CircularDependencyException
      */
-    public function CreateInstance_CircularSelfDepencency_ThrowsException()
+    public function ResolveClass_CircularSelfDepencency_ThrowsException()
     {
         $this->dic->register(
             'KampawTest\Dic\TestAsset\ConstructorInjection\G',
@@ -291,7 +291,7 @@ class DicTest extends TestCase
      * @test
      * @expectedException \Kampaw\Dic\Exception\CircularDependencyException
      */
-    public function CreateInstance_CircularSelfDepencencySecondLevel_ThrowsException()
+    public function ResolveClass_CircularSelfDepencencySecondLevel_ThrowsException()
     {
         $this->dic->register(
             'KampawTest\Dic\TestAsset\ConstructorInjection\H',
@@ -311,7 +311,7 @@ class DicTest extends TestCase
     /**
      * @test
      */
-    public function CreateInstance_CircularDependency_RecoversIfCaught()
+    public function ResolveClass_CircularDependency_RecoversIfCaught()
     {
         $this->dic->register(
             'KampawTest\Dic\TestAsset\ConstructorInjection\H',
@@ -337,5 +337,166 @@ class DicTest extends TestCase
         }
 
         $this->assertInstanceOf('KampawTest\Dic\TestAsset\ConstructorInjection\F', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function ResolveClass_DicAwareInterface_DicIsInjected()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
+        $result = $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\B');
+
+        $this->assertSame($this->dic, $result->getDic());
+    }
+
+    /**
+     * @test
+     */
+    public function ResolveClass_DicAwareInterfaceWhenDicNotRegistred_DoesntThrowException()
+    {
+        $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\B');
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * @test
+     */
+    public function ResolveClass_TwoInterfaces_ReturnsInjected()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\PropertyInjection\X',
+            'KampawTest\Dic\TestAsset\PropertyInjection\XInterface'
+        );
+
+        $result = $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\C');
+
+        $this->assertSame($this->dic, $result->getDic());
+        $this->assertInstanceOf('KampawTest\Dic\TestAsset\PropertyInjection\X', $result->getX());
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\BadMethodCall
+     */
+    public function ResolveClass_SetterHasScalarParameters_ThrowsException()
+    {
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\PropertyInjection\Y',
+            'KampawTest\Dic\TestAsset\PropertyInjection\YInterface'
+        );
+        $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\D');
+    }
+
+    /**
+     * @test
+     */
+    public function ResolveClass_SetterWithoutParameters_IsCalled()
+    {
+        $result = $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\E');
+
+        $this->assertNotNull($result->nothing);
+    }
+
+    /**
+     * @test
+     */
+    public function ResolveClass_UppercaseSetterName_IsCalled()
+    {
+        $result = $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\F');
+
+        $this->assertNotNull($result->nothing);
+    }
+
+    /**
+     * @test
+     */
+    public function InjectDependencies_ClassHasNoInterfaces_ReturnsUnchanged()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\A');
+        $mock->expects($this->never())->method($this->anything())->withAnyParameters();
+
+        $this->dic->injectDependencies($mock);
+    }
+
+    /**
+     * @test
+     */
+    public function InjectDependencies_DicAwareInterface_DicIsInjected()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\B');
+        $mock->expects($this->once())->method('setDic')->with($this->identicalTo($this->dic));
+
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
+        $this->dic->injectDependencies($mock);
+    }
+
+    /**
+     * @test
+     */
+    public function InjectDependencies_DicAwareInterfaceWhenDicNotRegistred_DoesntThrowException()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\B');
+
+        $this->dic->injectDependencies($mock);
+        $this->addToAssertionCount(1);
+    }
+
+    /**
+     * @test
+     */
+    public function InjectDependencies_TwoInterfaces_ReturnsInjected()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\C');
+        $mock->expects($this->once())->method('setDic')->with($this->identicalTo($this->dic));
+        $mock->expects($this->once())->method('setX')
+             ->with($this->isInstanceOf('KampawTest\Dic\TestAsset\PropertyInjection\X'));
+
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\PropertyInjection\X',
+            'KampawTest\Dic\TestAsset\PropertyInjection\XInterface'
+        );
+
+        $this->dic->injectDependencies($mock);
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\BadMethodCall
+     */
+    public function InjectDependencies_SetterHasScalarParameters_ThrowsException()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\D');
+
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\PropertyInjection\Y',
+            'KampawTest\Dic\TestAsset\PropertyInjection\YInterface'
+        );
+        $this->dic->injectDependencies($mock);
+    }
+
+    /**
+     * @test
+     */
+    public function InjectDependencies_SetterWithoutParameters_IsCalled()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\E');
+        $mock->expects($this->once())->method('setNothing');
+
+        $this->dic->injectDependencies($mock);
+    }
+
+    /**
+     * @test
+     */
+    public function InjectDependencies_UppercaseSetterName_IsCalled()
+    {
+        $mock = $this->getMock('KampawTest\Dic\TestAsset\PropertyInjection\F');
+        $mock->expects($this->once())->method('SETNOTHING');
+
+        $this->dic->injectDependencies($mock);
+
     }
 }
