@@ -30,6 +30,11 @@ class Dic implements DicInterface
     protected $dependencies = array();
 
     /**
+     * @var array $aliases
+     */
+    protected $aliases = array();
+
+    /**
      * @param $class
      * @param $interface
      * @param bool $shared
@@ -60,12 +65,43 @@ class Dic implements DicInterface
 
     /**
      * @param string $interface
+     * @param string $as
+     */
+    public function registerAlias($interface, $as)
+    {
+        if (isset($this->interfaces[$interface])) {
+            if (!isset($this->aliases[$as])) {
+                $this->aliases[$as] = $interface;
+            } else {
+                throw new UnexpectedValueException('Alias already registred');
+            }
+        } else {
+            throw new UnexpectedValueException('Supplied interface not registred');
+        }
+    }
+
+    /**
+     * @param string $alias
+     */
+    public function unregisterAlias($alias)
+    {
+        if (isset($this->aliases[$alias])) {
+            unset($this->aliases[$alias]);
+        } else {
+            throw new UnexpectedValueException('Supplied alias does not exist');
+        }
+    }
+
+    /**
+     * @param string $interface
      * @return array
      */
     public function listClasses($interface)
     {
         if (isset($this->interfaces[$interface])) {
             return $this->interfaces[$interface];
+        } elseif (isset($this->aliases[$interface])) {
+            return $this->interfaces[$this->aliases[$interface]];
         } else {
             return array();
         }

@@ -75,6 +75,73 @@ class DicTest extends TestCase
 
     /**
      * @test
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function RegisterAlias_NonExistentInterface_ThrowsException()
+    {
+        $this->dic->registerAlias('BogusInterface', 'Bogus');
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function RegisterAlias_UnregistredInterface_ThrowsException()
+    {
+        $this->dic->registerAlias('Kampaw\Dic\Dic', 'Dic');
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function RegisterAlias_OverwriteAlias_ThrowsException()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\Aliases\A',
+            'KampawTest\Dic\TestAsset\Aliases\AInterface'
+        );
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+        $this->dic->registerAlias('KampawTest\Dic\TestAsset\Aliases\AInterface', 'Dic');
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function RegisterAlias_Twice_ThrowsException()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+    }
+
+    /**
+     * @test
+     */
+    public function UnregisterAlias_RegistredAlias_RemovesAlias()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+        $this->dic->unregisterAlias('Dic');
+
+        $result = $this->dic->listClasses('Dic');
+
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function UnregisterAlias_NotRegistredAlias_ThrowsException()
+    {
+        $this->dic->unregisterAlias('Kampaw\Dic\Dic');
+    }
+
+    /**
+     * @test
      */
     public function ListClasses_PassOwnInterfaceWhenOneRegistred_ReturnsOwnClass()
     {
@@ -92,6 +159,19 @@ class DicTest extends TestCase
         $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
         $this->dic->register('DateTime', 'DateTimeInterface');
         $result = $this->dic->listClasses('Kampaw\Dic\DicInterface');
+
+        $this->assertContains('Kampaw\Dic\Dic', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function ListClasses_AliasOfOwnInterface_ReturnsOwnClass()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+
+        $result = $this->dic->listClasses('Dic');
 
         $this->assertContains('Kampaw\Dic\Dic', $result);
     }
@@ -407,6 +487,19 @@ class DicTest extends TestCase
         $result = $this->dic->ResolveClass('KampawTest\Dic\TestAsset\PropertyInjection\F');
 
         $this->assertNotNull($result->nothing);
+    }
+
+    /**
+     * @test
+     */
+    public function ResolveInterface_DicAlias_ReturnsDicInstance()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+
+        $result = $this->dic->resolveInterface('Dic');
+
+        $this->assertSame($this->dic, $result);
     }
 
     /**
