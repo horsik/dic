@@ -1,12 +1,12 @@
-<phpunit bootstrap="./bootstrap.php" colors="true">
+<phpunit bootstrap="../vendor/autoload.php" colors="true">
     <testsuites>
         <testsuite name="kampaw-dic">
-            <directory suffix="Test.php">./KampawTest</directory>
+            <directory suffix="Test.php">.</directory>
         </testsuite>
     </testsuites>
     <filter>
         <blacklist>
-            <directory>./KampawTest/Dic/TestAsset</directory>
+            <directory>./TestAsset</directory>
         </blacklist>
     </filter>
 </phpunit>
