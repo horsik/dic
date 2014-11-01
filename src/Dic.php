@@ -44,16 +44,16 @@ class Dic implements DicInterface
     public function register($class, $interface, $shared = true, $instance = null)
     {
         if (!class_exists($class)) {
-            throw new UnexpectedValueException('Supplied class not exists');
+            throw new UnexpectedValueException("Supplied class $class not exists");
         }
         if (!interface_exists($interface)) {
-            throw new UnexpectedValueException('Supplied interface not exists');
+            throw new UnexpectedValueException("Supplied interface $interface not exists");
         }
         if (isset($this->interfaces[$interface]) and in_array($class, $this->interfaces[$interface])) {
-            throw new UnexpectedValueException('Class already registred');
+            throw new UnexpectedValueException("Class $class already registred");
         }
         if (!in_array($interface, class_implements($class))) {
-            throw new UnexpectedValueException("Class doesn't implement supplied interface");
+            throw new UnexpectedValueException("Class $class doesn't implement interface $interface");
         }
 
         $this->interfaces[$interface][] = $class;
@@ -73,10 +73,10 @@ class Dic implements DicInterface
             if (!isset($this->aliases[$as])) {
                 $this->aliases[$as] = $interface;
             } else {
-                throw new UnexpectedValueException('Alias already registred');
+                throw new UnexpectedValueException("Alias $as already registred");
             }
         } else {
-            throw new UnexpectedValueException('Supplied interface not registred');
+            throw new UnexpectedValueException("Supplied interface $interface not registred");
         }
     }
 
@@ -88,7 +88,7 @@ class Dic implements DicInterface
         if (isset($this->aliases[$alias])) {
             unset($this->aliases[$alias]);
         } else {
-            throw new UnexpectedValueException('Supplied alias does not exist');
+            throw new UnexpectedValueException("Supplied alias $alias does not exist");
         }
     }
 
