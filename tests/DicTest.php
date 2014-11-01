@@ -29,6 +29,33 @@ class DicTest extends TestCase
     /**
      * @test
      */
+    public function Constructor_PassConfig_DicConfigured()
+    {
+        $config = array(
+            'factories' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\A'
+                ),
+            ),
+            'singletons' => array(
+                'Kampaw\Dic\DicInterface' => array(
+                    'Kampaw\Dic\Dic',
+                ),
+            ),
+            'aliases' => array(
+                'Kampaw\Dic\DicInterface' => 'Dic'
+            ),
+        );
+
+        $dic = new Dic($config);
+        $result = $dic->getConfig();
+
+        $this->assertEquals($config, $result);
+    }
+
+    /**
+     * @test
+     */
     public function Register_Self_ReturnsNull()
     {
         $result = $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
@@ -179,19 +206,6 @@ class DicTest extends TestCase
         $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
         $this->dic->register('DateTime', 'DateTimeInterface');
         $result = $this->dic->listClasses('Kampaw\Dic\DicInterface');
-
-        $this->assertContains('Kampaw\Dic\Dic', $result);
-    }
-
-    /**
-     * @test
-     */
-    public function ListClasses_AliasOfOwnInterface_ReturnsOwnClass()
-    {
-        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
-        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
-
-        $result = $this->dic->listClasses('Dic');
 
         $this->assertContains('Kampaw\Dic\Dic', $result);
     }
@@ -512,12 +526,33 @@ class DicTest extends TestCase
     /**
      * @test
      */
-    public function ResolveInterface_DicAlias_ReturnsDicInstance()
+    public function Resolve_RegistredInterface_ReturnsInstance()
+    {
+        $this->dic->register('DateTime', 'DateTimeInterface');
+        $result = $this->dic->resolve('DateTimeInterface');
+
+        $this->assertInstanceOf('DateTimeInterface', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function Resolve_Class_ReturnsInstance()
+    {
+        $result = $this->dic->resolve('DateTime');
+
+        $this->assertInstanceOf('DateTimeInterface', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function Resolve_DicAlias_ReturnsDicInstance()
     {
         $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false, $this->dic);
         $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
 
-        $result = $this->dic->resolveInterface('Dic');
+        $result = $this->dic->resolve('Dic');
 
         $this->assertSame($this->dic, $result);
     }
@@ -620,5 +655,342 @@ class DicTest extends TestCase
     public function InjectDependencies_InvalidArgument_ThrowsException()
     {
         $this->dic->injectDependencies(10);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_EmptyFactories_ClearsInterfaces()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->setConfig(array('factories' => array()));
+
+        $result = array_filter($this->dic->getConfig());
+
+        $this->assertEmpty($result);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_PassObject_NoException()
+    {
+        $config = new \stdClass();
+        $config->factories = array();
+        $config->singletons = array();
+        $config->aliases = array();
+
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals((array) $config, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterFactoryArray_Success()
+    {
+        $config = array(
+            'factories' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\A',
+                ),
+            ),
+            'singletons' => array(),
+            'aliases' => array(),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals($config, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterFactoryString_Success()
+    {
+        $config = array(
+            'factories' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => 'KampawTest\Dic\TestAsset\Config\A',
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getCandidate('KampawTest\Dic\TestAsset\Config\AInterface');
+
+        $this->assertEquals('KampawTest\Dic\TestAsset\Config\A', $result);
+    }
+
+    public function invalidFactoryProvider()
+    {
+        return array(
+            array(array(
+                'BogusInterface' => 'BogusClass'
+            )),
+            array(array(
+                'ArrayAccess' => 'BogusClass'
+            )),
+            array(array(
+                'BogusInterface' => 'Kampaw\Dic\Dic'
+            )),
+            array(array(
+                'ArrayAccess' => 'Kampaw\Dic\Dic'
+            )),
+            array(0xBAD),
+            array('invalid'),
+            array(new \stdClass()),
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider invalidFactoryProvider
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function SetConfig_RegisterInvalidFactory_ThrowsException($factories)
+    {
+        $config = array(
+            'factories' => $factories,
+        );
+        $this->dic->setConfig($config);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterFactoryMultipleClasses_Success()
+    {
+        $classes = array(
+            'KampawTest\Dic\TestAsset\Config\A',
+            'KampawTest\Dic\TestAsset\Config\B',
+        );
+        $config = array(
+            'factories' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => $classes,
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->listClasses('KampawTest\Dic\TestAsset\Config\AInterface');
+
+        $this->assertEquals($classes, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterFactoryMultipleInterfaces_Success()
+    {
+        $config = array(
+            'factories' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\A',
+                ),
+                'KampawTest\Dic\TestAsset\Config\CInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\C',
+                ),
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals($config['factories'], $result['factories']);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterSingletonArray_Success()
+    {
+        $config = array(
+            'singletons' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\A'
+                ),
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals($config['singletons'], $result['singletons']);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterSingletonString_Success()
+    {
+        $config = array(
+            'singletons' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => 'KampawTest\Dic\TestAsset\Config\A',
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+        $result = $result['singletons']['KampawTest\Dic\TestAsset\Config\AInterface'];
+
+        $this->assertContains('KampawTest\Dic\TestAsset\Config\A', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_EmptySingletons_ClearsSingletons()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface', false);
+        $this->dic->setConfig(array('singletons' => array()));
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEmpty($result['singletons']);
+    }
+
+    /**
+     * @test
+     * @dataProvider invalidFactoryProvider
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function SetConfig_RegisterInvalidSingleton_ThrowsException($singletons)
+    {
+        $config = array(
+            'singletons' => $singletons,
+        );
+        $this->dic->setConfig($config);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterSingletonMultipleClasses_Success()
+    {
+        $classes = array(
+            'KampawTest\Dic\TestAsset\Config\A',
+            'KampawTest\Dic\TestAsset\Config\B',
+        );
+        $config = array(
+            'singletons' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => $classes,
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+        $result = $result['singletons']['KampawTest\Dic\TestAsset\Config\AInterface'];
+
+        $this->assertEquals($classes, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterSingletonMultipleInterfaces_Success()
+    {
+        $config = array(
+            'singletons' => array(
+                'KampawTest\Dic\TestAsset\Config\AInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\A',
+                ),
+                'KampawTest\Dic\TestAsset\Config\CInterface' => array(
+                    'KampawTest\Dic\TestAsset\Config\C',
+                ),
+            ),
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals($config['singletons'], $result['singletons']);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterAliasEmptyArray_ClearsAliases()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
+        $this->dic->setConfig(array('aliases' => array()));
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEmpty($result['aliases']);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterOneAlias_Success()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $config = array(
+            'aliases' => array(
+                'Kampaw\Dic\DicInterface' => 'Dic',
+            )
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals($config['aliases'], $result['aliases']);
+    }
+
+    /**
+     * @test
+     */
+    public function SetConfig_RegisterMultipleAliases_Success()
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\Aliases\A',
+            'KampawTest\Dic\TestAsset\Aliases\AInterface'
+        );
+
+        $config = array(
+            'aliases' => array(
+                'Kampaw\Dic\DicInterface' => 'Dic',
+                'KampawTest\Dic\TestAsset\Aliases\AInterface' => 'A',
+            )
+        );
+        $this->dic->setConfig($config);
+
+        $result = $this->dic->getConfig();
+
+        $this->assertEquals($config['aliases'], $result['aliases']);
+    }
+
+    /**
+     * @test
+     * @dataProvider invalidAliasProvider
+     * @expectedException \Kampaw\Dic\Exception\InvalidArgumentException
+     */
+    public function SetConfig_RegisterInvalidAlias_ThrowsException($alias)
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+
+        $config = array(
+            'aliases' => array(
+                'Kampaw\Dic\DicInterface' => $alias,
+            )
+        );
+        $this->dic->setConfig($config);
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
+     */
+    public function SetConfig_RegisterAliasNotArray_ThrowsException()
+    {
+        $config = array(
+            'aliases' => 'invalid'
+        );
+        $this->dic->setConfig($config);
     }
 }

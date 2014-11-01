@@ -58,4 +58,9 @@ interface DicInterface
      * @return object
      */
     public function injectDependencies($object);
+
+    /**
+     * @param array $config
+     */
+    public function setConfig($config);
 }

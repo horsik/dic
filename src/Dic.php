@@ -17,7 +17,7 @@ class Dic implements DicInterface
     /**
      * @var array $interfaces
      */
-    protected $interfaces = array();
+    protected $factories = array();
 
     /**
      * @var array $singletons
@@ -35,6 +35,21 @@ class Dic implements DicInterface
     protected $aliases = array();
 
     /**
+     * @var array $candidates
+     */
+    protected $candidates = array();
+
+    /**
+     * @param array $config
+     */
+    public function __construct($config = null)
+    {
+        if ($config) {
+            $this->setConfig($config);
+        }
+    }
+
+    /**
      * @param $class
      * @param $interface
      * @param bool $shared
@@ -49,17 +64,36 @@ class Dic implements DicInterface
         if (!interface_exists($interface)) {
             throw new UnexpectedValueException("Supplied interface $interface not exists");
         }
-        if (isset($this->interfaces[$interface]) and in_array($class, $this->interfaces[$interface])) {
+        if (in_array($class, $this->listClasses($interface))) {
             throw new UnexpectedValueException("Class $class already registred");
         }
         if (!in_array($interface, class_implements($class))) {
             throw new UnexpectedValueException("Class $class doesn't implement interface $interface");
         }
 
-        $this->interfaces[$interface][] = $class;
+        $this->candidates[$interface] = $class;
 
-        if (!$shared) {
-            $this->singletons[$class] = $instance;
+        if ($shared) {
+            $this->factories[$interface][] = $class;
+        } else {
+            $this->singletons[$interface][$class] = $instance;
+        }
+    }
+
+    /**
+     * @param array $group
+     * @param bool $shared
+     */
+    public function registerGroup($group, $shared = true)
+    {
+        if (is_array($group)) {
+            foreach ($group as $interface => $classes) {
+                foreach ((array) $classes as $class) {
+                    $this->register($class, $interface, $shared);
+                }
+            }
+        } else {
+            throw new UnexpectedValueException('Class list must be an array');
         }
     }
 
@@ -73,7 +107,7 @@ class Dic implements DicInterface
             throw new InvalidArgumentException('Alias must be a string');
         }
 
-        if (isset($this->interfaces[$interface])) {
+        if ($this->getCandidate($interface)) {
             if (!isset($this->aliases[$as])) {
                 $this->aliases[$as] = $interface;
             } else {
@@ -81,6 +115,20 @@ class Dic implements DicInterface
             }
         } else {
             throw new UnexpectedValueException("Supplied interface $interface not registred");
+        }
+    }
+
+    /**
+     * @param array $config
+     */
+    public function registerAliasGroup($config)
+    {
+        if (is_array($config)) {
+            foreach ($config as $interface => $alias) {
+                $this->registerAlias($interface, $alias);
+            }
+        } else {
+            throw new UnexpectedValueException('Class list must be an array');
         }
     }
 
@@ -102,13 +150,16 @@ class Dic implements DicInterface
      */
     public function listClasses($interface)
     {
-        if (isset($this->interfaces[$interface])) {
-            return $this->interfaces[$interface];
-        } elseif (isset($this->aliases[$interface])) {
-            return $this->interfaces[$this->aliases[$interface]];
-        } else {
-            return array();
+        $interfaces = array();
+
+        if (isset($this->factories[$interface])) {
+            $interfaces += $this->factories[$interface];
         }
+        if (isset($this->singletons[$interface])) {
+            $interfaces += array_keys($this->singletons[$interface]);
+        }
+
+        return $interfaces;
     }
 
     /**
@@ -117,8 +168,64 @@ class Dic implements DicInterface
      */
     public function getCandidate($interface)
     {
-        if ($classes = $this->listClasses($interface)) {
-            return end($classes);
+        if (isset($this->candidates[$interface])) {
+            return $this->candidates[$interface];
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig()
+    {
+        $singletons = array();
+
+        foreach ($this->singletons as $interface => $classes) {
+            $singletons[$interface] = array_keys($classes);
+        }
+
+        return array(
+            'factories' => $this->factories,
+            'singletons' => $singletons,
+            'aliases' => array_flip($this->aliases),
+        );
+    }
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config)
+    {
+        $config = (array) $config;
+
+        if (isset($config['factories'])) {
+            $this->factories = array();
+            $this->registerGroup($config['factories']);
+        }
+
+        if (isset($config['singletons'])) {
+            $this->singletons = array();
+            $this->registerGroup($config['singletons'], false);
+        }
+
+        if (isset($config['aliases'])) {
+            $this->aliases = array();
+            $this->registerAliasGroup($config['aliases']);
+        }
+    }
+
+    /**
+     * @param string $name
+     * @return object
+     */
+    public function resolve($name)
+    {
+        if (interface_exists($name)) {
+            return $this->resolveInterface($name);
+        } elseif (isset($this->aliases[$name])) {
+            return $this->resolveInterface($this->aliases[$name]);
+        } else {
+            return $this->resolveClass($name);
         }
     }
 
@@ -168,8 +275,10 @@ class Dic implements DicInterface
             if (in_array($class, $this->dependencies)) {
                 throw new CircularDependencyException("Circular dependency $class");
             }
-            if (array_key_exists($class, $this->singletons)) {
-                if (!$singleton = &$this->singletons[$class]) {
+            if (isset($this->singletons[$interface])
+                and array_key_exists($class, $this->singletons[$interface]))
+            {
+                if (!$singleton = &$this->singletons[$interface][$class]) {
                     $singleton = $this->createInstance($class);
                 }
                 return $singleton;
