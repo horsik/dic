@@ -69,6 +69,10 @@ class Dic implements DicInterface
      */
     public function registerAlias($interface, $as)
     {
+        if (!is_string($as)) {
+            throw new InvalidArgumentException('Alias must be a string');
+        }
+
         if (isset($this->interfaces[$interface])) {
             if (!isset($this->aliases[$as])) {
                 $this->aliases[$as] = $interface;

@@ -117,6 +117,26 @@ class DicTest extends TestCase
         $this->dic->registerAlias('Kampaw\Dic\DicInterface', 'Dic');
     }
 
+    public function invalidAliasProvider()
+    {
+        return array(
+            array(0xBAD),
+            array(array()),
+            array(new \stdClass()),
+        );
+    }
+
+    /**
+     * @test
+     * @dataProvider invalidAliasProvider
+     * @expectedException \Kampaw\Dic\Exception\InvalidArgumentException
+     */
+    public function RegisterAlias_InvalidAlias_ThrowsException($alias)
+    {
+        $this->dic->register('Kampaw\Dic\Dic', 'Kampaw\Dic\DicInterface');
+        $this->dic->registerAlias('Kampaw\Dic\DicInterface', $alias);
+    }
+
     /**
      * @test
      */
