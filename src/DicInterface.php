@@ -19,10 +19,21 @@ interface DicInterface
     public function register($class, $interface, $shared = true, $instance = null);
 
     /**
+     * @param array $group
+     * @param bool $shared
+     */
+    public function registerGroup($group, $shared = true);
+
+    /**
      * @param string $interface
      * @param string $as
      */
     public function registerAlias($interface, $as);
+
+    /**
+     * @param array $config
+     */
+    public function registerAliasGroup($config);
 
     /**
      * @param string $alias
@@ -42,6 +53,22 @@ interface DicInterface
     public function getCandidate($interface);
 
     /**
+     * @return array
+     */
+    public function getConfig();
+
+    /**
+     * @param mixed $config
+     */
+    public function setConfig($config);
+
+    /**
+     * @param string $name
+     * @return object
+     */
+    public function resolve($name);
+
+    /**
      * @param $interface
      * @return object
      */
@@ -58,9 +85,4 @@ interface DicInterface
      * @return object
      */
     public function injectDependencies($object);
-
-    /**
-     * @param array $config
-     */
-    public function setConfig($config);
 }
