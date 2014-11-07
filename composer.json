@@ -1,5 +1,5 @@
 {
-    "name": "kampaw/kampaw-dic",
+    "name": "kampaw/dic",
     "description": "Dependency Injection Container",
     "minimum-stability": "stable",
     "require": {
