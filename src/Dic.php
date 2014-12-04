@@ -84,16 +84,12 @@ class Dic implements DicInterface
      * @param array $group
      * @param bool $shared
      */
-    public function registerGroup($group, $shared = true)
+    public function registerGroup(array $group, $shared = false)
     {
-        if (is_array($group)) {
-            foreach ($group as $interface => $classes) {
-                foreach ((array) $classes as $class) {
-                    $this->register($class, $interface, $shared);
-                }
+        foreach ($group as $interface => $classes) {
+            foreach ((array) $classes as $class) {
+                $this->register($class, $interface, $shared);
             }
-        } else {
-            throw new UnexpectedValueException('Class list must be an array');
         }
     }
 
@@ -121,14 +117,10 @@ class Dic implements DicInterface
     /**
      * @param array $config
      */
-    public function registerAliasGroup($config)
+    public function registerAliasGroup(array $config)
     {
-        if (is_array($config)) {
-            foreach ($config as $interface => $alias) {
-                $this->registerAlias($interface, $alias);
-            }
-        } else {
-            throw new UnexpectedValueException('Class list must be an array');
+        foreach ($config as $interface => $alias) {
+            $this->registerAlias($interface, $alias);
         }
     }
 
@@ -200,7 +192,7 @@ class Dic implements DicInterface
 
         if (isset($config['factories'])) {
             $this->factories = array();
-            $this->registerGroup($config['factories']);
+            $this->registerGroup($config['factories'], true);
         }
 
         if (isset($config['singletons'])) {

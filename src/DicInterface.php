@@ -22,7 +22,7 @@ interface DicInterface
      * @param array $group
      * @param bool $shared
      */
-    public function registerGroup($group, $shared = true);
+    public function registerGroup(array $group, $shared = true);
 
     /**
      * @param string $interface
@@ -33,7 +33,7 @@ interface DicInterface
     /**
      * @param array $config
      */
-    public function registerAliasGroup($config);
+    public function registerAliasGroup(array $config);
 
     /**
      * @param string $alias

@@ -740,9 +740,6 @@ class DicTest extends TestCase
             array(array(
                 'ArrayAccess' => 'Kampaw\Dic\Dic'
             )),
-            array(0xBAD),
-            array('invalid'),
-            array(new \stdClass()),
         );
     }
 
@@ -978,18 +975,6 @@ class DicTest extends TestCase
             'aliases' => array(
                 'Kampaw\Dic\DicInterface' => $alias,
             )
-        );
-        $this->dic->setConfig($config);
-    }
-
-    /**
-     * @test
-     * @expectedException \Kampaw\Dic\Exception\UnexpectedValueException
-     */
-    public function SetConfig_RegisterAliasNotArray_ThrowsException()
-    {
-        $config = array(
-            'aliases' => 'invalid'
         );
         $this->dic->setConfig($config);
     }
