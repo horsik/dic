@@ -40,6 +40,11 @@ class Dic implements DicInterface
     protected $candidates = array();
 
     /**
+     * @var array $args
+     */
+    protected $args = array();
+
+    /**
      * @param array $config
      */
     public function __construct($config = null)
@@ -207,6 +212,17 @@ class Dic implements DicInterface
     }
 
     /**
+     * @param array $args
+     * @return $this
+     */
+    public function withArguments(array $args)
+    {
+        $this->args = $args;
+
+        return $this;
+    }
+
+    /**
      * @param string $name
      * @return object
      */
@@ -253,7 +269,7 @@ class Dic implements DicInterface
             throw new InvalidArgumentException('Argument must be an object');
         }
 
-        return $this->_injectDependencies($object, new \ReflectionClass($object));
+        return $this->injectProperties($object, new \ReflectionClass($object));
     }
 
     /**
@@ -291,11 +307,11 @@ class Dic implements DicInterface
     protected function createInstance($class)
     {
         $reflection = new \ReflectionClass($class);
-        $args = array();
-
+        $args = $this->args;
+        $this->args = array();
         $this->dependencies[] = $class;
 
-        if ($constructor = $reflection->getConstructor()) {
+        if (!$args and $constructor = $reflection->getConstructor()) {
             foreach ($constructor->getParameters() as $parameter) {
                 if ($parameter->getClass()) {
                     $args[] = $this->getDependency($parameter->getClass()->name);
@@ -307,7 +323,7 @@ class Dic implements DicInterface
             }
         }
 
-        return $this->_injectDependencies($reflection->newInstanceArgs($args), $reflection);
+        return $this->injectProperties($reflection->newInstanceArgs($args), $reflection);
     }
 
     /**
@@ -315,7 +331,7 @@ class Dic implements DicInterface
      * @param \ReflectionClass $reflection
      * @return object
      */
-    protected function _injectDependencies($object, \ReflectionClass $reflection)
+    protected function injectProperties($object, \ReflectionClass $reflection)
     {
         foreach ($reflection->getInterfaces() as $interface) {
             if (strrpos($interface->name, 'AwareInterface')) {

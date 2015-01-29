@@ -978,4 +978,36 @@ class DicTest extends TestCase
         );
         $this->dic->setConfig($config);
     }
+
+    /**
+     * @test
+     */
+    public function WithArguments_IntegerArgument_PropertySet()
+    {
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\ConstructorInjection\I',
+            'KampawTest\Dic\TestAsset\ConstructorInjection\IInterface'
+        );
+
+        $result = $this->dic->withArguments(array(10))->resolve('KampawTest\Dic\TestAsset\ConstructorInjection\IInterface');
+
+        $this->assertEquals($result->test, 10);
+    }
+
+    /**
+     * @test
+     */
+    public function WithArguments_SecondResolveWithoutArguments_SecondObjectNotHydrated()
+    {
+        $this->dic->register(
+            'KampawTest\Dic\TestAsset\ConstructorInjection\I',
+            'KampawTest\Dic\TestAsset\ConstructorInjection\IInterface'
+        );
+
+        $first = $this->dic->withArguments(array(10))->resolve('KampawTest\Dic\TestAsset\ConstructorInjection\IInterface');
+        $second = $this->dic->resolve('KampawTest\Dic\TestAsset\ConstructorInjection\IInterface');
+
+        $this->assertEquals($first->test, 10);
+        $this->assertNull($second->test);
+    }
 }
