@@ -2,6 +2,6 @@
 
 namespace Kampaw\Dic\Exception;
 
-class CircularDependencyException extends \Exception implements ExceptionInterface
+class CircularDependencyException extends \LogicException implements ExceptionInterface
 {
 }

@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic;
 
-interface DicInterface
+class InstanceRepository
 {
 
-} 
+}
