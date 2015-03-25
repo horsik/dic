@@ -3,7 +3,7 @@
 namespace Kampaw\Dic\Assembler;
 
 use Kampaw\Dic\Definition\DefinitionInterface;
-use Kampaw\Dic\Definition\Parameter;
+use Kampaw\Dic\Definition\Parameter\AbstractParameter;
 use Kampaw\Dic\DefinitionRepository;
 use Kampaw\Dic\Exception\BadMethodCallException;
 use Kampaw\Dic\Exception\CircularDependencyException;
@@ -52,11 +52,10 @@ abstract class AbstractAssembler implements AssemblerInterface
         $this->safeguard->attach($definition);
 
         $arguments = $this->getDependencies($definition, $arguments);
-        $instance = $this->createInstance($definition, $arguments);
 
         $this->safeguard->detach($definition);
 
-        return $instance;
+        return $this->createInstance($definition, $arguments);
     }
 
     /**
@@ -108,11 +107,11 @@ abstract class AbstractAssembler implements AssemblerInterface
     }
 
     /**
-     * @param Parameter $parameter
+     * @param AbstractParameter $parameter
      * @param array $arguments
      * @return mixed
      */
-    protected function getDependency(Parameter $parameter, array $arguments)
+    protected function getDependency(AbstractParameter $parameter, array $arguments)
     {
         $name = $parameter->getName();
 

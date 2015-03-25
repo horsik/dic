@@ -1,10 +1,10 @@
 <?php
 
-namespace Kampaw\Dic\Definition;
+namespace Kampaw\Dic\Definition\Parameter;
 
 use Kampaw\Dic\Exception\InvalidArgumentException;
 
-class Parameter
+abstract class AbstractParameter
 {
     /**
      * @var string $name
@@ -33,11 +33,14 @@ class Parameter
      */
     public function __construct($name, $type = null, $value = null)
     {
-        $this->name = $name;
-        $this->type = $type;
+        $this->setName($name);
+
+        if (!is_null($type)) {
+            $this->setType($type);
+        }
 
         if (func_num_args() > 2) {
-            $this->value = $value;
+            $this->setValue($value);
             $this->optional = true;
         }
     }
@@ -51,6 +54,11 @@ class Parameter
     }
 
     /**
+     * @param string $name
+     */
+    protected abstract function setName($name);
+
+    /**
      * @return string
      */
     public function getType()
@@ -59,12 +67,22 @@ class Parameter
     }
 
     /**
+     * @param string $type
+     */
+    protected abstract function setType($type);
+
+    /**
      * @return mixed
      */
     public function getValue()
     {
         return $this->value;
     }
+
+    /**
+     * @param mixed $value
+     */
+    protected abstract function setValue($value);
 
     /**
      * @return bool
@@ -95,8 +113,10 @@ class Parameter
      */
     public function acceptsValue($value)
     {
-        return !$this->type
-            or is_a($value, $this->type)
-            or ($this->type === 'array' and is_array($value));
+        $type = $this->getType();
+
+        return !$type
+            or is_a($value, $type)
+            or ($type === 'array' and is_array($value));
     }
 }

@@ -5,8 +5,10 @@ namespace Kampaw\Dic\Definition\Builder;
 /**
  * @coversDefaultClass \Kampaw\Dic\Definition\Builder\ReflectionDefinitionBuilder
  * @covers ::<!public>
- * @uses \Kampaw\Dic\Definition\ClassDefinition
- * @uses \Kampaw\Dic\Definition\Parameter
+ * @uses \Kampaw\Dic\Definition\ClassDefinition\AbstractClassDefinition
+ * @uses \Kampaw\Dic\Definition\ClassDefinition\UnsanitizedClassDefinition
+ * @uses \Kampaw\Dic\Definition\Parameter\AbstractParameter
+ * @uses \Kampaw\Dic\Definition\Parameter\UnsanitizedParameter
  */
 class ReflectionDefinitionBuilderTest extends \PHPUnit_Framework_TestCase
 {

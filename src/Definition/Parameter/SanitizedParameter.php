@@ -1,29 +1,12 @@
 <?php
 
-namespace Kampaw\Dic\Definition;
+namespace Kampaw\Dic\Definition\Parameter;
 
 use Kampaw\Dic\Exception\DomainException;
 use Kampaw\Dic\Exception\InvalidArgumentException;
 
-class SanitizedParameter extends Parameter
+class SanitizedParameter extends AbstractParameter
 {
-    /**
-     * @param Parameter $parameter
-     */
-    public function __construct(Parameter $parameter)
-    {
-        $this->setName($parameter->getName());
-
-        if (!is_null($parameter->getType())) {
-            $this->setType($parameter->getType());
-        }
-
-        if ($parameter->isOptional()) {
-            $this->setValue($parameter->getValue());
-            $this->optional = true;
-        }
-    }
-
     /**
      * @param string $name
      */
@@ -58,7 +41,7 @@ class SanitizedParameter extends Parameter
     protected function setValue($value)
     {
         if ($this->type and !$this->acceptsValue($value)) {
-            throw new InvalidArgumentException("Invalid type {$this->type} expected");
+            throw new InvalidArgumentException("Invalid type, {$this->type} expected");
         }
 
         $this->value = $value;

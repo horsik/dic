@@ -2,19 +2,21 @@
 
 namespace Kampaw\Dic\Assembler;
 
-use Kampaw\Dic\Definition\ClassDefinition;
-use Kampaw\Dic\Definition\Example;
-use Kampaw\Dic\Definition\ExampleExtended;
-use Kampaw\Dic\Definition\ExampleWithInterface;
-use Kampaw\Dic\Definition\ExampleWithInterfaceExtended;
-use Kampaw\Dic\Definition\Parameter;
+use Kampaw\Dic\Definition\ClassDefinition\UnsanitizedClassDefinition;
+use Kampaw\Dic\Definition\Parameter\UnsanitizedParameter;
+use Kampaw\Dic\Definition\Parameter\Example;
+use Kampaw\Dic\Definition\Parameter\ExampleExtended;
+use Kampaw\Dic\Definition\Parameter\ExampleWithInterface;
+use Kampaw\Dic\Definition\Parameter\ExampleWithInterfaceExtended;
 
 /**
  * @coversDefaultClass \Kampaw\Dic\Assembler\AbstractAssembler
  * @covers ::<!public>
  * @covers ::__construct
- * @uses \Kampaw\Dic\Definition\ClassDefinition
- * @uses \Kampaw\Dic\Definition\Parameter
+ * @uses \Kampaw\Dic\Definition\ClassDefinition\AbstractClassDefinition
+ * @uses \Kampaw\Dic\Definition\ClassDefinition\UnsanitizedClassDefinition
+ * @uses \Kampaw\Dic\Definition\Parameter\AbstractParameter
+ * @uses \Kampaw\Dic\Definition\Parameter\UnsanitizedParameter
  */
 class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
 {
@@ -73,7 +75,7 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ConcreteDefinition_PassedDefinition()
     {
-        $target = new ClassDefinition('\ExampleClass');
+        $target = new UnsanitizedClassDefinition('\ExampleClass');
         $this->addDefinitions($target);
 
         $result = $this->assembler->assemble('\ExampleClass');
@@ -105,8 +107,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithDefaultValueNoUserArguments_PassedDefaultValue($default)
     {
-        $param1 = new Parameter('someName', null, $default);
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null, $default);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -122,8 +124,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithDefaultValueUserArgumentMatchingName_PassedUserValue()
     {
-        $param1 = new Parameter('someName', null, 'default');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null, 'default');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -139,8 +141,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithDefaultValueUserArgumentNotMatchingName_PassedDefaultValue()
     {
-        $param1 = new Parameter('someName', null, 'default');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null, 'default');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -156,8 +158,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithoutDefaultValueUserArgumentMatchingName_PassedUserValue()
     {
-        $param1 = new Parameter('someName', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -174,8 +176,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithoutDefaultValueNoUserArguments_ThrowsException()
     {
-        $param1 = new Parameter('someName', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -188,8 +190,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithDefaultValueUserArgumentWithoutName_PassedUserValue()
     {
-        $param1 = new Parameter('someName', null, 'default');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null, 'default');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -205,8 +207,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithoutDefaultValueUserArgumentWithoutName_PassedUserValue()
     {
-        $param1 = new Parameter('someName', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -222,9 +224,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersWithDefaultValueNoUserArguments_PassedDefaultValues()
     {
-        $param1 = new Parameter('param1', null, 'default1');
-        $param2 = new Parameter('param2', null, 'default2');
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null, 'default1');
+        $param2 = new UnsanitizedParameter('param2', null, 'default2');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -241,9 +243,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersWithoutDefaultValueTwoUserArguments_PassedUserValues()
     {
-        $param1 = new Parameter('param1', null);
-        $param2 = new Parameter('param2', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null);
+        $param2 = new UnsanitizedParameter('param2', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -260,9 +262,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersWithDefaultValueTwoUserArguments_PassedUserValues()
     {
-        $param1 = new Parameter('param1', null, 'default1');
-        $param2 = new Parameter('param2', null, 'default2');
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null, 'default1');
+        $param2 = new UnsanitizedParameter('param2', null, 'default2');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -280,9 +282,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersFirstDefaultSecondMissingValue_ThrowsException()
     {
-        $param1 = new Parameter('param1', null, 'default1');
-        $param2 = new Parameter('param2', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null, 'default1');
+        $param2 = new UnsanitizedParameter('param2', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -296,9 +298,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersFirstUserSecondMissingValue_ThrowsException()
     {
-        $param1 = new Parameter('param1', null);
-        $param2 = new Parameter('param2', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null);
+        $param2 = new UnsanitizedParameter('param2', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -312,9 +314,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersFirstDefaultSecondNotMatchingName_ThrowsException()
     {
-        $param1 = new Parameter('param1', null, 'default1');
-        $param2 = new Parameter('param2', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null, 'default1');
+        $param2 = new UnsanitizedParameter('param2', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -327,9 +329,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersFirstUserWithoutNameSecondDefault_PassedUserAndDefault()
     {
-        $param1 = new Parameter('param1', null);
-        $param2 = new Parameter('param2', null, 'default2');
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null);
+        $param2 = new UnsanitizedParameter('param2', null, 'default2');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -346,9 +348,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_TwoParametersFirstUserMatchingNameSecondUserWithoutName_PassedUserValues()
     {
-        $param1 = new Parameter('param1', null);
-        $param2 = new Parameter('param2', null);
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', null);
+        $param2 = new UnsanitizedParameter('param2', null);
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target);
 
@@ -365,8 +367,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithClassHintUserArgumentMatchingName_PassedUserValue()
     {
-        $param1 = new Parameter('someName', '\ArrayObject');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', '\ArrayObject');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -383,8 +385,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithClassHintUserArgumentWithoutName_PassedUserValue()
     {
-        $param1 = new Parameter('someName', '\ArrayObject');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', '\ArrayObject');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -402,8 +404,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithClassHintUserArgumentWrongClass_ThrowsException()
     {
-        $param1 = new Parameter('someName', '\ArrayObject');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('someName', '\ArrayObject');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -436,8 +438,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParameterWithArrayHintUserArgumentNotArray_ThrowsException($argument)
     {
-        $param1 = new Parameter('arrayHint', 'array');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('arrayHint', 'array');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -451,8 +453,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ConcreteDependencyDefinitionMissing_ThrowsException()
     {
-        $param1 = new Parameter('concrete', '\ClassDependency');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
+        $param1 = new UnsanitizedParameter('concrete', '\ClassDependency');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
 
         $this->addDefinitions($target);
 
@@ -465,9 +467,9 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ConcreteDependencyDefinitionInRepository_UsedRepositoryDefinition()
     {
-        $param1 = new Parameter('concrete', '\ClassDependency');
-        $target = new ClassDefinition('\ExampleClass', array($param1));
-        $dependency = new ClassDefinition('\ClassDependency');
+        $param1 = new UnsanitizedParameter('concrete', '\ClassDependency');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1));
+        $dependency = new UnsanitizedClassDefinition('\ClassDependency');
 
         $this->addDefinitions($target, $dependency);
 
@@ -483,13 +485,13 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_NestedConcreteDependencyDefinitionsInRepository_UsedRepositoryDefinitions()
     {
-        $level2 = new ClassDefinition('\Level_2_Dependency');
+        $level2 = new UnsanitizedClassDefinition('\Level_2_Dependency');
 
-        $param1 = new Parameter('level_2_dependency', '\Level_2_Dependency');
-        $level1 = new ClassDefinition('\Level_1_Dependency', array($param1));
+        $param1 = new UnsanitizedParameter('level_2_dependency', '\Level_2_Dependency');
+        $level1 = new UnsanitizedClassDefinition('\Level_1_Dependency', array($param1));
 
-        $param2 = new Parameter('level_1_dependency', '\Level_1_Dependency');
-        $target = new ClassDefinition('\ExampleClass', array($param2));
+        $param2 = new UnsanitizedParameter('level_1_dependency', '\Level_1_Dependency');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param2));
 
         $this->addDefinitions($target, $level1, $level2);
 
@@ -507,8 +509,8 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_CircularDependency_ThrowsException()
     {
-        $param1 = new Parameter('level_1_dependency', '\CircularDependency');
-        $target = new ClassDefinition('\CircularDependency', array($param1));
+        $param1 = new UnsanitizedParameter('level_1_dependency', '\CircularDependency');
+        $target = new UnsanitizedClassDefinition('\CircularDependency', array($param1));
 
         $this->addDefinitions($target);
 
@@ -521,11 +523,11 @@ class AbstractAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function Assemble_ParallelConcreteDependency_UsedRepositoryDefinition()
     {
-        $parallel = new ClassDefinition('\ParallelDependency');
+        $parallel = new UnsanitizedClassDefinition('\ParallelDependency');
 
-        $param1 = new Parameter('param1', '\ParallelDependency');
-        $param2 = new Parameter('param2', '\ParallelDependency');
-        $target = new ClassDefinition('\ExampleClass', array($param1, $param2));
+        $param1 = new UnsanitizedParameter('param1', '\ParallelDependency');
+        $param2 = new UnsanitizedParameter('param2', '\ParallelDependency');
+        $target = new UnsanitizedClassDefinition('\ExampleClass', array($param1, $param2));
 
         $this->addDefinitions($target, $parallel);
 

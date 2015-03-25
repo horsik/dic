@@ -2,15 +2,15 @@
 
 namespace Kampaw\Dic\Definition\Builder;
 
-use Kampaw\Dic\Definition\ClassDefinition;
-use Kampaw\Dic\Definition\Parameter;
+use Kampaw\Dic\Definition\ClassDefinition\UnsanitizedClassDefinition;
+use Kampaw\Dic\Definition\Parameter\UnsanitizedParameter;
 use Kampaw\Dic\Exception\DomainException;
 
 class ReflectionDefinitionBuilder
 {
     /**
-     * @param $name
-     * @return ClassDefinition
+     * @param string $name
+     * @return UnsanitizedClassDefinition
      */
     public function getClassDefinition($name)
     {
@@ -23,7 +23,7 @@ class ReflectionDefinitionBuilder
 
         if ($constructor = $reflection->getConstructor()) {
             foreach ($constructor->getParameters() as $parameter) {
-                $parameters[] = new Parameter(
+                $parameters[] = new UnsanitizedParameter(
                     $this->getName($parameter),
                     $this->getClass($parameter),
                     $this->getValue($parameter)
@@ -31,7 +31,7 @@ class ReflectionDefinitionBuilder
             }
         }
 
-        return new ClassDefinition('\\' . $reflection->getName(), $parameters);
+        return new UnsanitizedClassDefinition('\\' . $reflection->getName(), $parameters);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace Kampaw\Dic\Definition;
 
+use Kampaw\Dic\Definition\Parameter\AbstractParameter;
+
 interface DefinitionInterface
 {
     /**
@@ -10,7 +12,7 @@ interface DefinitionInterface
     public function getClass();
 
     /**
-     * @return array[Parameter]
+     * @return AbstractParameter[]
      */
     public function getParameters();
 }
