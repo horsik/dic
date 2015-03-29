@@ -41,21 +41,11 @@ class SanitizedClassDefinition extends AbstractClassDefinition
     }
 
     /**
-     * @param AbstractParameter[] $parameters
+     * @param $parameter
      */
-    protected function setParameters(array $parameters)
+    protected function addParameter($parameter)
     {
-        foreach ($parameters as $parameter) {
-            $this->parameters[$parameter->getName()] = $this->sanitizeParameter($parameter);
-        }
-    }
-
-    /**
-     * @param Mutator[] $mutators
-     */
-    protected function setMutators(array $mutators)
-    {
-        // TODO: Implement setMutators() method.
+        $this->parameters[$parameter->getName()] = $this->sanitizeParameter($parameter);
     }
 
     /**
@@ -71,5 +61,13 @@ class SanitizedClassDefinition extends AbstractClassDefinition
         }
 
         return new SanitizedParameter($name, $parameter->getType(), $parameter->getValue());
+    }
+
+    /**
+     * @param Mutator[] $mutators
+     */
+    protected function setMutators(array $mutators)
+    {
+        // TODO: Implement setMutators() method.
     }
 }

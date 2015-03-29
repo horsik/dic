@@ -4,6 +4,7 @@ namespace Kampaw\Dic\Definition\ClassDefinition;
 
 /**
  * @coversDefaultClass \Kampaw\Dic\Definition\ClassDefinition\AbstractClassDefinition
+ * @covers ::<!public>
  */
 class AbstractClassDefinitionTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,8 +42,8 @@ class AbstractClassDefinitionTest extends \PHPUnit_Framework_TestCase
     {
         $this->definition
              ->expects($this->once())
-             ->method('setParameters')
-             ->with(array('exampleParameter'));
+             ->method('addParameter')
+             ->with('exampleParameter');
 
         $this->definition->__construct('exampleClass', array('exampleParameter'));
     }

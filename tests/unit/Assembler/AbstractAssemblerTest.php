@@ -3,6 +3,7 @@
 namespace Kampaw\Dic\Assembler;
 
 use Kampaw\Dic\Definition\ClassDefinition\UnsanitizedClassDefinition;
+use Kampaw\Dic\Definition\InterfaceDefinition\UnsanitizedInterfaceDefinition;
 use Kampaw\Dic\Definition\Parameter\UnsanitizedParameter;
 use Kampaw\Dic\Definition\Parameter\Example;
 use Kampaw\Dic\Definition\Parameter\ExampleExtended;

@@ -25,6 +25,7 @@ class SanitizedClassDefinitionTest extends \PHPUnit_Framework_TestCase
             array(array()),
             array(new \stdClass()),
             array(tmpfile()),
+            array(function() {}),
         );
     }
 

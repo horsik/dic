@@ -15,11 +15,11 @@ class UnsanitizedClassDefinition extends AbstractClassDefinition
     }
 
     /**
-     * @param AbstractParameter[] $parameters
+     * @param $parameter
      */
-    protected function setParameters(array $parameters)
+    protected function addParameter($parameter)
     {
-        $this->parameters = $parameters;
+        $this->parameters[] = $parameter;
     }
 
     /**

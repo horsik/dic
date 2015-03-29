@@ -56,9 +56,19 @@ abstract class AbstractClassDefinition implements DefinitionInterface
     }
 
     /**
-     * @param array $parameters
+     * @param AbstractParameter[] $parameters
      */
-    protected abstract function setParameters(array $parameters);
+    protected function setParameters(array $parameters)
+    {
+        foreach ($parameters as $parameter) {
+            $this->addParameter($parameter);
+        }
+    }
+
+    /**
+     * @param $parameter
+     */
+    protected abstract function addParameter($parameter);
 
     /**
      * @return Mutator[]
