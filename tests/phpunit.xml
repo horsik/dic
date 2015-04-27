@@ -5,6 +5,7 @@
     <testsuites>
         <testsuite name="dic">
             <directory suffix="Test.php">./unit</directory>
+            <directory suffix="Test.php">./integration</directory>
         </testsuite>
     </testsuites>
     <filter>
