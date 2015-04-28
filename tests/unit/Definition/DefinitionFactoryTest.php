@@ -5,9 +5,6 @@ namespace Kampaw\Dic\Definition;
 /**
  * @coversDefaultClass \Kampaw\Dic\Definition\DefinitionFactory
  * @covers ::<!public>
- * @uses \Kampaw\Dic\Config\Configurable
- * @uses \Kampaw\Dic\Definition\Definition
- * @uses \Kampaw\Dic\Definition\Parameter
  */
 class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -24,23 +21,12 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      * @covers ::getDefinition
-     * @expectedException \ReflectionException
-     */
-    public function GetDefinition_ClassNotExists_ReturnsNull()
-    {
-        $result = $this->factory->getDefinition('\nonExistent');
-    }
-
-    /**
-     * @test
-     * @covers ::getDefinition
      */
     public function GetDefinition_ClassExists_ReturnsDefinition()
     {
         $result = $this->factory->getDefinition('\stdClass');
 
-        $this->assertInstanceOf(__NAMESPACE__ . '\Definition', $result);
-        $this->assertSame('\stdClass', $result->getConcrete());
+        $this->assertSame('\stdClass', $result['concrete']);
     }
 
     /**
@@ -51,7 +37,7 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
     {
         $result = $this->factory->getDefinition('\stdClass');
 
-        $this->assertEmpty($result->getParameters());
+        $this->assertEmpty($result['parameters']);
     }
 
     /**
@@ -60,9 +46,10 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetDefinition_SingleConstructorParameter_CorrectParameterCount()
     {
-        $result = $this->factory->getDefinition('\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter');
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $result = $this->factory->getDefinition($asset);
 
-        $this->assertCount(1, $result->getParameters());
+        $this->assertCount(1, $result['parameters']);
     }
 
     /**
@@ -71,9 +58,10 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetDefinition_MultipleConstructorParameters_CorrectParameterCount()
     {
-        $result = $this->factory->getDefinition('\Kampaw\Dic\Assets\ConstructorInjection\ConcreteAndScalarParameter');
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteAndScalarParameter';
+        $result = $this->factory->getDefinition($asset);
 
-        $this->assertCount(2, $result->getParameters());
+        $this->assertCount(2, $result['parameters']);
     }
 
     /**
@@ -82,11 +70,10 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetDefinition_SingleConstructorParameter_CorrectParameterName()
     {
-        $result = $this->factory
-                       ->getDefinition('\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter')
-                       ->getParameters();
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $result = $this->factory->getDefinition($asset);
 
-        $this->assertSame('concrete', $result[0]->getName());
+        $this->assertSame('concrete', $result['parameters'][0]['name']);
     }
 
     /**
@@ -95,11 +82,10 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetDefinition_SingleConstructorParameter_CorrectParameterType()
     {
-        $result = $this->factory
-            ->getDefinition('\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter')
-            ->getParameters();
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $result = $this->factory->getDefinition($asset);
 
-        $this->assertSame('\stdClass', $result[0]->getType());
+        $this->assertSame('\stdClass', $result['parameters'][0]['type']);
     }
 
     /**
@@ -108,12 +94,11 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetDefinition_ConcreteAndScalarConstructorParameter_CorrectParameterTypes()
     {
-        $result = $this->factory
-            ->getDefinition('\Kampaw\Dic\Assets\ConstructorInjection\ConcreteAndScalarParameter')
-            ->getParameters();
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteAndScalarParameter';
+        $result = $this->factory->getDefinition($asset);
 
-        $this->assertSame('\stdClass', $result[0]->getType());
-        $this->assertEmpty($result[1]->getType());
+        $this->assertSame('\stdClass', $result['parameters'][0]['type']);
+        $this->assertArrayNotHasKey('type', $result['parameters'][1]);
     }
 
     /**
@@ -122,10 +107,56 @@ class DefinitionFactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetDefinition_ConstructorParameterWithDefaultValue_CorrectParameterValue()
     {
-        $result = $this->factory
-            ->getDefinition('\Kampaw\Dic\Assets\ConstructorInjection\ParameterWithDefaultValue')
-            ->getParameters();
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ParameterWithDefaultValue';
+        $result = $this->factory->getDefinition($asset);
 
-        $this->assertSame('default', $result[0]->getValue());
+        $this->assertSame('default', $result['parameters'][0]['value']);
+    }
+
+    /**
+     * @test
+     * @covers ::getDefinition
+     */
+    public function GetDefinition_StdClassAsSubject_EmptyMutators()
+    {
+        $result = $this->factory->getDefinition('\stdClass');
+
+        $this->assertCount(0, $result['mutators']);
+    }
+
+    /**
+     * @test
+     * @covers ::getDefinition
+     */
+    public function GetDefinition_SingleMutatorNoParameters_ReturnsEmptyArray()
+    {
+        $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorNoParameters';
+        $result = $this->factory->getDefinition($asset);
+
+        $this->assertCount(0, $result['mutators']);
+    }
+
+    /**
+     * @test
+     * @covers ::getDefinition
+     */
+    public function GetDefinition_SingleMutatorScalarParameter_ReturnsCorrectName()
+    {
+        $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorScalarParameter';
+        $result = $this->factory->getDefinition($asset);
+
+        $this->assertSame('scalar', $result['mutators'][0]['name']);
+    }
+
+    /**
+     * @test
+     * @covers ::getDefinition
+     */
+    public function GetDefinition_SingleMutatorConcreteParameter_ReturnsCorrectName()
+    {
+        $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorConcreteParameter';
+        $result = $this->factory->getDefinition($asset);
+
+        $this->assertSame('concrete', $result['mutators'][0]['name']);
     }
 }

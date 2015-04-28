@@ -17,9 +17,9 @@ class Definition extends Configurable
     protected $abstract;
 
     /**
-     * @var string $id
+     * @var string $name
      */
-    protected $id;
+    protected $name;
 
     /**
      * @var Parameter[] $parameters
@@ -57,9 +57,9 @@ class Definition extends Configurable
     /**
      * @return string
      */
-    public function getId()
+    public function getName()
     {
-        return $this->id;
+        return $this->name;
     }
 
     /**

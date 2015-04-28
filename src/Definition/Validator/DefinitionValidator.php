@@ -14,7 +14,8 @@ class DefinitionValidator
     const ABSTRACT_INVALID_TYPE        = 'Invalid abstract type, expected string';
     const ABSTRACT_INTERFACE_NOT_FOUND = 'Invalid abstract type, interface not exists';
     const ABSTRACT_BASECLASS_MISMATCH  = 'Invalid abstract type, expected instance of previously provided concrete type';
-    const ID_INVALID_TYPE              = 'Invalid id, expected string';
+    const NAME_INVALID_TYPE            = 'Invalid name, expected string';
+    const NAME_INVALID_VALUE           = 'Invalid name, used invalid characters';
     const LIFETIME_INVALID_TYPE        = 'Invalid lifetime, expected string';
     const LIFETIME_INVALID_VALUE       = 'Invalid lifetime, expected "transient" or "singleton"';
     const AUTOWIRE_INVALID_TYPE        = 'Invalid autowire mode, expected string';
@@ -68,7 +69,7 @@ class DefinitionValidator
 //            $this->checkParameters($definition);
 //            $this->checkMutators($definition);
             $this->checkAbstract($definition);
-            $this->checkId($definition);
+            $this->checkName($definition);
             $this->checkLifetime($definition);
             $this->checkAutowire($definition);
             $this->checkCandidate($definition);
@@ -116,10 +117,7 @@ class DefinitionValidator
         elseif (!interface_exists($definition['abstract'])) {
             $this->definitionErrors[] = self::ABSTRACT_INTERFACE_NOT_FOUND;
         }
-        // @todo(kampaw) check for malformed concrete
-        elseif (!empty($definition['concrete']) and
-                !is_subclass_of($definition['concrete'], $definition['abstract'])
-        ) {
+        elseif (!is_subclass_of($definition['concrete'], $definition['abstract'])) {
             $this->definitionErrors[] = self::ABSTRACT_BASECLASS_MISMATCH;
         }
     }
@@ -127,14 +125,17 @@ class DefinitionValidator
     /**
      * @param array $definition
      */
-    protected function checkId(array $definition)
+    protected function checkName(array $definition)
     {
-        if (!array_key_exists('id', $definition)) {
-            /* No id supplied, nothing to validate */
+        if (!array_key_exists('name', $definition)) {
+            /* No name supplied, nothing to validate */
             return;
         }
-        elseif (!is_string($definition['id'])) {
-            $this->definitionErrors[] = self::ID_INVALID_TYPE;
+        elseif (!is_string($definition['name'])) {
+            $this->definitionErrors[] = self::NAME_INVALID_TYPE;
+        }
+        elseif (!preg_match('/\A[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\Z/', $definition['name'])) {
+            $this->definitionErrors[] = self::NAME_INVALID_VALUE;
         }
     }
 
@@ -167,7 +168,7 @@ class DefinitionValidator
         elseif (!is_string($definition['autowire'])) {
             $this->definitionErrors[] = self::AUTOWIRE_INVALID_TYPE;
         }
-        elseif (!in_array($definition['autowire'], array('auto', 'name', 'type'))) {
+        elseif (!in_array($definition['autowire'], array('none', 'auto', 'name', 'type'))) {
             $this->definitionErrors[] = self::AUTOWIRE_INVALID_VALUE;
         }
     }

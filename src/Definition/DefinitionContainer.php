@@ -18,18 +18,18 @@ class DefinitionContainer
     protected $abstract = array();
 
     /**
-     * @var Definition[] $id
+     * @var Definition[] $name
      */
-    protected $id = array();
+    protected $name = array();
 
     /**
-     * @param string $id
+     * @param string $name
      * @returns Definition|null
      */
-    public function getById($id)
+    public function getByName($name)
     {
-        if (isset($this->id[$id])) {
-            return $this->id[$id];
+        if (isset($this->name[$name])) {
+            return $this->name[$name];
         }
     }
 
@@ -53,13 +53,13 @@ class DefinitionContainer
      */
     public function insert(Definition $definition)
     {
-        if (isset($this->id[$definition->getId()])) {
+        if (isset($this->name[$definition->getName()])) {
             return false;
         }
 
         $this->addConcrete($definition);
         $this->addAbstract($definition);
-        $this->addId($definition);
+        $this->addName($definition);
 
         return true;
     }
@@ -95,7 +95,7 @@ class DefinitionContainer
     {
         $this->concrete = array();
         $this->abstract = array();
-        $this->id = array();
+        $this->name = array();
     }
 
     /**
@@ -123,12 +123,12 @@ class DefinitionContainer
     /**
      * @param Definition $definition
      */
-    protected function addId(Definition $definition)
+    protected function addName(Definition $definition)
     {
-        $id = $definition->getId();
+        $name = $definition->getName();
 
-        if (!empty($id)) {
-            $this->id[$id] = $definition;
+        if (!empty($name)) {
+            $this->name[$name] = $definition;
         }
     }
 }

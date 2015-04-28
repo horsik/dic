@@ -7,9 +7,9 @@ use Kampaw\Dic\Config\Configurable;
 class Mutator extends Configurable
 {
     /**
-     * @var string $method
+     * @var string $name
      */
-    protected $method;
+    protected $name;
 
     /**
      * @var string $type
@@ -32,9 +32,9 @@ class Mutator extends Configurable
     /**
      * @return string
      */
-    public function getMethod()
+    public function getName()
     {
-        return $this->method;
+        return $this->name;
     }
 
     /**

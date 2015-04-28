@@ -2,9 +2,6 @@
 
 namespace Kampaw\Dic\Definition;
 
-use Kampaw\Dic\Definition\Definition;
-use Kampaw\Dic\Definition\Parameter;
-
 class DefinitionFactory
 {
     /**
@@ -15,18 +12,17 @@ class DefinitionFactory
     /**
      * @param string $class
      * @throws \ReflectionException
-     * @return Definition
+     * @return array
      */
     public function getDefinition($class)
     {
         $this->reflection = new \ReflectionClass($class);
 
-        $config = array(
+        return array(
             'concrete' => $this->getClass(),
             'parameters' => $this->getParameters(),
+            'mutators' => $this->getMutators(),
         );
-
-        return new Definition($config);
     }
 
     /**
@@ -38,43 +34,71 @@ class DefinitionFactory
     }
 
     /**
-     * @return Parameter[]
+     * @return array
      */
     protected function getParameters()
     {
         $result = array();
+
         $constructor = $this->reflection->getConstructor();
 
         if (!$constructor) {
             return $result;
         }
 
-        $parameters = $constructor->getParameters();
+        foreach ($constructor->getParameters() as $parameter) {
+            $config = array();
 
-        foreach ($parameters as $value) {
-            $config = array(
-                'name' => $value->getName(),
-            );
-
-            if ($class = $value->getClass()) {
+            if ($class = $parameter->getClass()) {
                 $config['type'] = '\\' . $class->getName();
             }
 
-            if ($value->isOptional()) {
-                $config['value'] = $value->getDefaultValue();
+            if ($parameter->isOptional()) {
+                $config['value'] = $parameter->getDefaultValue();
             }
 
-            $result[] = new Parameter($config);
+            $config['name'] = $parameter->getName();
+
+            $result[] = $config;
         }
 
         return $result;
     }
 
     /**
-     * @return Mutator[]
+     * @return array
      */
     protected function getMutators()
     {
-        // @todo(kampaw) to be implemented
+        $result = array();
+
+        $methods = $this->reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach ($methods as $method) {
+            $config = array();
+
+            $name = $method->getName();
+            $parameters = $method->getParameters();
+
+            if (strncasecmp($name, 'set', 3) <> 0) {
+                /* method name without a prefix, discard */
+                continue;
+            }
+
+            if (empty($parameters)) {
+                /* method with no parameters, discard */
+                continue;
+            }
+
+            if ($class = $parameters[0]->getClass()) {
+                $config['type'] = '\\' . $class->getName();
+            }
+
+            $config['name'] = lcfirst(substr($name, 3));
+
+            $result[] = $config;
+        }
+
+        return $result;
     }
 }

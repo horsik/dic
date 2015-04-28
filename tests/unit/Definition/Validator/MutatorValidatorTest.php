@@ -83,7 +83,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
         $errors = $this->validator->getErrors();
 
         $this->assertCount(1, $errors);
-        $this->assertContains(MutatorValidator::METHOD_KEY_MISSING, $errors);
+        $this->assertContains(MutatorValidator::NAME_KEY_MISSING, $errors);
     }
 
     function nonStringTypeProvider()
@@ -105,9 +105,9 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      * @covers ::isValid
      * @dataProvider nonStringTypeProvider
      */
-    public function IsValid_MethodInvalidType_ReturnsFalse($method)
+    public function IsValid_NameInvalidType_ReturnsFalse($name)
     {
-        $parameter['method'] = $method;
+        $parameter['name'] = $name;
 
         $this->assertFalse($this->validator->isValid($parameter));
     }
@@ -118,25 +118,25 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      * @covers ::getErrors
      * @dataProvider nonStringTypeProvider
      */
-    public function GetErrors_MethodInvalidType_ReturnsError($method)
+    public function GetErrors_NameInvalidType_ReturnsError($name)
     {
-        $parameter['method'] = $method;
+        $parameter['name'] = $name;
         
         $this->validator->isValid($parameter);
 
         $errors = $this->validator->getErrors();
 
         $this->assertCount(1, $errors);
-        $this->assertContains(MutatorValidator::METHOD_INVALID_TYPE, $errors);
+        $this->assertContains(MutatorValidator::NAME_INVALID_TYPE, $errors);
     }
 
     /**
      * @test
      * @covers ::isValid
      */
-    public function IsValid_MethodValidValue_ReturnsTrue()
+    public function IsValid_NameValidValue_ReturnsTrue()
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
 
         $this->assertTrue($this->validator->isValid($parameter));
     }
@@ -145,9 +145,9 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      * @test
      * @covers ::isValid
      */
-    public function IsValid_MethodEmptyString_ReturnsFalse()
+    public function IsValid_NameEmptyString_ReturnsFalse()
     {
-        $parameter['method'] = '';
+        $parameter['name'] = '';
 
         $this->assertFalse($this->validator->isValid($parameter));
     }
@@ -157,16 +157,16 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      * @covers ::isValid
      * @covers ::getErrors
      */
-    public function GetErrors_MethodEmptyString_ReturnsError()
+    public function GetErrors_NameEmptyString_ReturnsError()
     {
-        $parameter['method'] = '';
+        $parameter['name'] = '';
 
         $this->validator->isValid($parameter);
 
         $errors = $this->validator->getErrors();
 
         $this->assertCount(1, $errors);
-        $this->assertContains(MutatorValidator::METHOD_EMPTY_STRING, $errors);
+        $this->assertContains(MutatorValidator::NAME_EMPTY_STRING, $errors);
     }
 
     /**
@@ -187,7 +187,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($first, $second);
     }
 
-    public function invalidMethodProvider()
+    public function invalidNameProvider()
     {
         return array(
             array('0invalid'),
@@ -201,11 +201,11 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      * @covers ::isValid
-     * @dataProvider invalidMethodProvider
+     * @dataProvider invalidNameProvider
      */
-    public function IsValid_InvalidMethodValue_ReturnsFalse($method)
+    public function IsValid_InvalidNameValue_ReturnsFalse($name)
     {
-        $parameter['method'] = $method;
+        $parameter['name'] = $name;
 
         $this->assertFalse($this->validator->isValid($parameter));
     }
@@ -214,18 +214,18 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      * @test
      * @covers ::isValid
      * @covers ::getErrors
-     * @dataProvider invalidMethodProvider
+     * @dataProvider invalidNameProvider
      */
-    public function GetErrors_InvalidMethodValue_ReturnsError($method)
+    public function GetErrors_InvalidNameValue_ReturnsError($name)
     {
-        $parameter['method'] = $method;
+        $parameter['name'] = $name;
 
         $this->validator->isValid($parameter);
 
         $errors = $this->validator->getErrors();
 
         $this->assertCount(1, $errors);
-        $this->assertContains(MutatorValidator::METHOD_INVALID_VALUE, $errors);
+        $this->assertContains(MutatorValidator::NAME_INVALID_VALUE, $errors);
     }
 
     /**
@@ -235,7 +235,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function IsValid_TypeInvalidType_ReturnsFalse($type)
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['type'] = $type;
 
         $this->assertFalse($this->validator->isValid($parameter));
@@ -249,7 +249,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function GetErrors_TypeInvalidType_ReturnsError($type)
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['type'] = $type;
 
         $this->validator->isValid($parameter);
@@ -266,7 +266,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function IsValid_TypeClassNotExists_ReturnsFalse()
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['type'] = '\nonExistent';
 
         $this->assertFalse($this->validator->isValid($parameter));
@@ -279,7 +279,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function GetErrors_TypeClassNotExists_ReturnsError()
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['type'] = '\nonExistent';
 
         $this->validator->isValid($parameter);
@@ -305,7 +305,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function IsValid_TypeValidValue_ReturnsTrue($type)
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['type'] = $type;
 
         $this->assertTrue($this->validator->isValid($parameter));
@@ -317,7 +317,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function IsValid_TypeEmptyString_ReturnsFalse()
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['type'] = '';
 
         $this->assertFalse($this->validator->isValid($parameter));
@@ -330,7 +330,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function IsValid_RefInvalidType_ReturnsFalse($ref)
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['ref'] = $ref;
 
         $this->assertFalse($this->validator->isValid($parameter));
@@ -344,7 +344,7 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function GetErrors_RefInvalidType_ReturnsError($ref)
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['ref'] = $ref;
 
         $this->validator->isValid($parameter);
@@ -361,9 +361,41 @@ class MutatorValidatorTest extends \PHPUnit_Framework_TestCase
      */
     public function IsValid_RefValidValue_ReturnsTrue()
     {
-        $parameter['method'] = 'validMethod';
+        $parameter['name'] = 'validName';
         $parameter['ref'] = 'validRef';
 
         $this->assertTrue($this->validator->isValid($parameter));
+    }
+    
+    /**
+     * @test
+     * @covers ::isValid
+     * @dataProvider invalidNameProvider
+     */
+    public function IsValid_InvalidRefValue_ReturnsFalse($name)
+    {
+        $parameter['name'] = 'validName';
+        $parameter['ref'] = $name;
+
+        $this->assertFalse($this->validator->isValid($parameter));
+    }
+
+    /**
+     * @test
+     * @covers ::isValid
+     * @covers ::getErrors
+     * @dataProvider invalidNameProvider
+     */
+    public function GetErrors_InvalidRefValue_ReturnsError($name)
+    {
+        $parameter['name'] = 'validName';
+        $parameter['ref'] = $name;
+
+        $this->validator->isValid($parameter);
+
+        $errors = $this->validator->getErrors();
+
+        $this->assertCount(1, $errors);
+        $this->assertContains(MutatorValidator::REF_INVALID_VALUE, $errors);
     }
 }

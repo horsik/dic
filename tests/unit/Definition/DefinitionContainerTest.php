@@ -126,39 +126,39 @@ class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      * @covers ::insert
-     * @covers ::getById
+     * @covers ::getByName
      */
-    public function GetById_RegisteredId_ReturnsDefinition()
+    public function GetByName_RegisteredName_ReturnsDefinition()
     {
         $config = array(
             'concrete' => '\ArrayObject',
-            'id' => 'registered'
+            'name' => 'registered'
         );
 
         $definition = new Definition($config);
         $this->container->insert($definition);
 
-        $this->assertSame($definition, $this->container->getById('registered'));
+        $this->assertSame($definition, $this->container->getByName('registered'));
     }
 
     /**
      * @test
-     * @covers ::getById
+     * @covers ::getByName
      */
-    public function GetById_UnregistredId_ReturnsNull()
+    public function GetByName_UnregistredName_ReturnsNull()
     {
-        $this->assertNull($this->container->getById('unregistered'));
+        $this->assertNull($this->container->getByName('unregistered'));
     }
 
     /**
      * @test
      * @covers ::insert
      */
-    public function Insert_TwoDefinitionsIdCollision_ReturnsFalse()
+    public function Insert_TwoDefinitionsNameCollision_ReturnsFalse()
     {
         $config = array(
             'concrete' => '\ArrayObject',
-            'id' => 'registered'
+            'name' => 'registered'
         );
 
         $definition1 = new Definition($config);
@@ -214,19 +214,19 @@ class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
      * @test
      * @covers ::insert
      * @covers ::clear
-     * @covers ::getById
+     * @covers ::getByName
      */
-    public function Clear_ContainsIdDefinition_CanNoLongerResolve()
+    public function Clear_ContainsNameDefinition_CanNoLongerResolve()
     {
         $config = array(
             'concrete' => '\ArrayObject',
-            'id' => 'registered'
+            'name' => 'registered'
         );
 
         $definition = new Definition($config);
         $this->container->insert($definition);
         $this->container->clear();
 
-        $this->assertNull($this->container->getById('registered'));
+        $this->assertNull($this->container->getByName('registered'));
     }
 }

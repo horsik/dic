@@ -281,10 +281,10 @@ class DefinitionValidatorTest extends \PHPUnit_Framework_TestCase
      * @covers ::isValid
      * @dataProvider nonStringTypeProvider
      */
-    public function IsValid_IdInvalidType_ReturnsFalse($id)
+    public function IsValid_NameInvalidType_ReturnsFalse($name)
     {
         $definition['concrete'] = '\stdClass';
-        $definition['id'] = $id;
+        $definition['name'] = $name;
 
         $this->assertFalse($this->validator->isValid($definition));
     }
@@ -295,27 +295,27 @@ class DefinitionValidatorTest extends \PHPUnit_Framework_TestCase
      * @covers ::getDefinitionErrors
      * @dataProvider nonStringTypeProvider
      */
-    public function GetErrors_IdInvalidType_ReturnsError($id)
+    public function GetErrors_NameInvalidType_ReturnsError($name)
     {
         $definition['concrete'] = '\stdClass';
-        $definition['id'] = $id;
+        $definition['name'] = $name;
 
         $this->validator->isValid($definition);
 
         $errors = $this->validator->getDefinitionErrors();
 
         $this->assertCount(1, $errors);
-        $this->assertContains(DefinitionValidator::ID_INVALID_TYPE, $errors);
+        $this->assertContains(DefinitionValidator::NAME_INVALID_TYPE, $errors);
     }
 
     /**
      * @test
      * @covers ::isValid
      */
-    public function IsValid_IdValidValue_ReturnsTrue()
+    public function IsValid_NameValidValue_ReturnsTrue()
     {
         $definition['concrete'] = '\stdClass';
-        $definition['id'] = 'validId';
+        $definition['name'] = 'validName';
 
         $this->assertTrue($this->validator->isValid($definition));
     }
@@ -456,6 +456,7 @@ class DefinitionValidatorTest extends \PHPUnit_Framework_TestCase
     public function validAutowireValueProvider()
     {
         return array(
+            array('none'),
             array('auto'),
             array('name'),
             array('type'),
@@ -570,5 +571,48 @@ class DefinitionValidatorTest extends \PHPUnit_Framework_TestCase
         $definition['candidate'] = $candidate;
 
         $this->assertTrue($this->validator->isValid($definition));
+    }
+
+    public function invalidNameProvider()
+    {
+        return array(
+            array('0invalid'),
+            array('i nvalid'),
+            array("\x00"),
+            array("i\x00"),
+            array('inv-alid'),
+        );
+    }
+
+    /**
+     * @test
+     * @covers ::isValid
+     * @dataProvider invalidNameProvider
+     */
+    public function IsValid_InvalidNameValue_ReturnsFalse($name)
+    {
+        $parameter['concrete'] = '\stdClass';
+        $parameter['name'] = $name;
+
+        $this->assertFalse($this->validator->isValid($parameter));
+    }
+
+    /**
+     * @test
+     * @covers ::isValid
+     * @covers ::getErrors
+     * @dataProvider invalidNameProvider
+     */
+    public function GetErrors_InvalidNameValue_ReturnsError($name)
+    {
+        $parameter['concrete'] = '\stdClass';
+        $parameter['name'] = $name;
+
+        $this->validator->isValid($parameter);
+
+        $errors = $this->validator->getDefinitionErrors();
+
+        $this->assertCount(1, $errors);
+        $this->assertContains(MutatorValidator::NAME_INVALID_VALUE, $errors);
     }
 }

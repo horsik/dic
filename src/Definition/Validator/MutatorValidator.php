@@ -10,13 +10,14 @@ class MutatorValidator
      * @var string Error messages
      */
     const ARGUMENT_NOT_AN_ARRAY = 'Invalid mutator, argument is not an array';
-    const METHOD_KEY_MISSING    = 'Mutator name is missing';
-    const METHOD_INVALID_TYPE   = 'Invalid method, expected string';
-    const METHOD_EMPTY_STRING   = 'Invalid method, string cannot be empty';
-    const METHOD_INVALID_VALUE  = 'Invalid method, used invalid characters';
+    const NAME_KEY_MISSING      = 'Mutator name is missing';
+    const NAME_INVALID_TYPE     = 'Invalid name, expected string';
+    const NAME_EMPTY_STRING     = 'Invalid name, string cannot be empty';
+    const NAME_INVALID_VALUE    = 'Invalid name, used invalid characters';
     const TYPE_INVALID_TYPE     = 'Invalid type, expected string';
     const TYPE_CLASS_NOT_FOUND  = 'Invalid type, class/interface not exists or cannot be autoloaded';
     const REF_INVALID_TYPE      = 'Invalid ref, expected string';
+    const REF_INVALID_VALUE     = 'Invalid ref, used invalid characters';
 
     /**
      * @var string[] $errors
@@ -35,9 +36,9 @@ class MutatorValidator
             $this->errors[] = self::ARGUMENT_NOT_AN_ARRAY;
         }
         else {
-            $this->checkMethod($mutator);
+            $this->checkName($mutator);
             $this->checkType($mutator);
-            $this->checkId($mutator);
+            $this->checkRef($mutator);
         }
 
         return empty($this->errors);
@@ -54,19 +55,19 @@ class MutatorValidator
     /**
      * @param array $mutator
      */
-    protected function checkMethod(array $mutator)
+    protected function checkName(array $mutator)
     {
-        if (!array_key_exists('method', $mutator)) {
-            $this->errors[] = self::METHOD_KEY_MISSING;
+        if (!array_key_exists('name', $mutator)) {
+            $this->errors[] = self::NAME_KEY_MISSING;
         }
-        elseif (!is_string($mutator['method'])) {
-            $this->errors[] = self::METHOD_INVALID_TYPE;
+        elseif (!is_string($mutator['name'])) {
+            $this->errors[] = self::NAME_INVALID_TYPE;
         }
-        elseif (empty($mutator['method'])) {
-            $this->errors[] = self::METHOD_EMPTY_STRING;
+        elseif (empty($mutator['name'])) {
+            $this->errors[] = self::NAME_EMPTY_STRING;
         }
-        elseif (!preg_match('/\A[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\Z/', $mutator['method'])) {
-            $this->errors[] = self::METHOD_INVALID_VALUE;
+        elseif (!preg_match('/\A[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\Z/', $mutator['name'])) {
+            $this->errors[] = self::NAME_INVALID_VALUE;
         }
     }
 
@@ -90,7 +91,7 @@ class MutatorValidator
     /**
      * @param array $mutator
      */
-    protected function checkId(array $mutator)
+    protected function checkRef(array $mutator)
     {
         if (!array_key_exists('ref', $mutator)) {
             /* No reference supplied, nothing to validate */
@@ -98,6 +99,9 @@ class MutatorValidator
         }
         elseif (!is_string($mutator['ref'])) {
             $this->errors[] = self::REF_INVALID_TYPE;
+        }
+        elseif (!preg_match('/\A[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\Z/', $mutator['ref'])) {
+            $this->errors[] = self::REF_INVALID_VALUE;
         }
     }
 } 
