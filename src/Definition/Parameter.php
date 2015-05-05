@@ -2,9 +2,7 @@
 
 namespace Kampaw\Dic\Definition;
 
-use Kampaw\Dic\Config\Configurable;
-
-class Parameter extends Configurable
+class Parameter
 {
     /**
      * @var string $name
@@ -36,7 +34,11 @@ class Parameter extends Configurable
      */
     public function __construct(array $config)
     {
-        Configurable::__construct($config);
+        foreach ($config as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->{$key} = $value;
+            }
+        }
     }
 
     /**

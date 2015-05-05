@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Exception;
 
-class InvalidDefinitionException extends DicException
+class InvalidDefinitionException extends ContainerException
 {
 
 }

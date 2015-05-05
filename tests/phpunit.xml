@@ -13,4 +13,7 @@
             <directory>./assets</directory>
         </blacklist>
     </filter>
+    <php>
+        <ini name="memory_limit" value="64M" />
+    </php>
 </phpunit>

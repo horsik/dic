@@ -2,9 +2,7 @@
 
 namespace Kampaw\Dic\Definition;
 
-use Kampaw\Dic\Config\Configurable;
-
-class Mutator extends Configurable
+class Mutator
 {
     /**
      * @var string $name
@@ -26,7 +24,11 @@ class Mutator extends Configurable
      */
     public function __construct(array $config)
     {
-        Configurable::__construct($config);
+        foreach ($config as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->{$key} = $value;
+            }
+        }
     }
 
     /**

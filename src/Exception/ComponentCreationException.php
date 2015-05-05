@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Exception;
 
-class ComponentCreationException extends DicException
+class ComponentCreationException extends ContainerException
 {
 
 }

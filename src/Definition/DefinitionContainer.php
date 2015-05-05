@@ -2,133 +2,83 @@
 
 namespace Kampaw\Dic\Definition;
 
-/**
- * @todo(kampaw) refactor i don't like it
- */
 class DefinitionContainer
 {
     /**
-     * @var Definition[][] $concrete
+     * @var DefinitionInterface[] $types
      */
-    protected $concrete = array();
+    protected $types = array();
 
     /**
-     * @var Definition[][] $abstract
+     * @var DefinitionInterface[] $names
      */
-    protected $abstract = array();
-
-    /**
-     * @var Definition[] $name
-     */
-    protected $name = array();
-
-    /**
-     * @param string $name
-     * @returns Definition|null
-     */
-    public function getByName($name)
-    {
-        if (isset($this->name[$name])) {
-            return $this->name[$name];
-        }
-    }
+    protected $names = array();
 
     /**
      * @param string $type
-     * @returns Definition|null
+     * @return DefinitionInterface
      */
     public function getByType($type)
     {
-        if (isset($this->concrete[$type])) {
-            return current($this->concrete[$type]);
-        }
-        elseif (isset($this->abstract[$type])) {
-            return current($this->abstract[$type]);
+        if (isset($this->types[$type])) {
+            return $this->types[$type];
         }
     }
 
     /**
-     * @param Definition $definition
-     * @returns bool
+     * @param string $name
+     * @return DefinitionInterface
      */
-    public function insert(Definition $definition)
+    public function getByName($name)
     {
-        if (isset($this->name[$definition->getName()])) {
-            return false;
+        if (isset($this->names[$name])) {
+            return $this->names[$name];
         }
+    }
 
+    /**
+     * @param DefinitionInterface $definition
+     */
+    public function insert(DefinitionInterface $definition)
+    {
         $this->addConcrete($definition);
         $this->addAbstract($definition);
         $this->addName($definition);
-
-        return true;
     }
 
     /**
-     * @param Definition $definition
-     * @returns bool
+     * @param DefinitionInterface $definition
      */
-    public function remove(Definition $definition)
-    {
-        // not needed at this point
-        // also it's highly questionable if clear() will ever be
-    }
-
-    /**
-     * @returns int
-     */
-    public function count()
-    {
-        $count = 0;
-
-        foreach ($this->concrete as $value) {
-            $count += count($value);
-        }
-
-        return $count;
-    }
-
-    /**
-     * @returns null
-     */
-    public function clear()
-    {
-        $this->concrete = array();
-        $this->abstract = array();
-        $this->name = array();
-    }
-
-    /**
-     * @param Definition $definition
-     */
-    protected function addConcrete(Definition $definition)
+    protected function addConcrete(DefinitionInterface $definition)
     {
         $concrete = $definition->getConcrete();
 
-        $this->concrete[$concrete][] = $definition;
-    }
-
-    /**
-     * @param Definition $definition
-     */
-    protected function addAbstract(Definition $definition)
-    {
-        $abstract = $definition->getAbstract();
-
-        if (!empty($abstract)) {
-            $this->abstract[$abstract][] = $definition;
+        if (!isset($this->types[$concrete])) {
+            $this->types[$concrete] = $definition;
         }
     }
 
     /**
-     * @param Definition $definition
+     * @param DefinitionInterface $definition
      */
-    protected function addName(Definition $definition)
+    protected function addAbstract(DefinitionInterface $definition)
+    {
+        $abstract = $definition->getAbstract();
+
+        if ($abstract && !isset($this->types[$abstract])) {
+            $this->types[$abstract] = $definition;
+        }
+    }
+
+    /**
+     * @param DefinitionInterface $definition
+     */
+    protected function addName(DefinitionInterface $definition)
     {
         $name = $definition->getName();
 
-        if (!empty($name)) {
-            $this->name[$name] = $definition;
+        if ($name && !isset($this->names[$name])) {
+            $this->names[$name] = $definition;
         }
     }
 }

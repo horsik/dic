@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Exception;
 
-class DefinitionDiscoveryException extends DicException
+class DefinitionDiscoveryException extends ContainerException
 {
 
 }
