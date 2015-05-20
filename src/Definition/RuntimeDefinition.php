@@ -5,83 +5,125 @@ namespace Kampaw\Dic\Definition;
 class RuntimeDefinition extends AbstractDefinition
 {
     /**
-     * @var \ReflectionClass $reflection
-     */
-    protected $reflection;
-
-    /**
      * @param string $class
      */
     public function __construct($class)
     {
-        $this->reflection = new \ReflectionClass($class);
+        $reflection = new \ReflectionClass($class);
 
-        $this->setConcrete();
-        $this->setParameters();
-        $this->setMutators();
+        if (!$reflection->isInstantiable()) {
+            throw new DefinitionException("Class $class is not instantiable");
+        }
+
+        $this->setConcrete($reflection);
+        $this->setParameters($reflection);
+        $this->setMutators($reflection);
     }
 
-    protected function setConcrete()
+    /**
+     * @param \ReflectionClass $reflection
+     */
+    protected function setConcrete(\ReflectionClass $reflection)
     {
-        $this->concrete = '\\' . $this->reflection->getName();
+        $this->concrete = '\\' . $reflection->getName();
     }
 
-    protected function setParameters()
+    /**
+     * @param \ReflectionClass $reflection
+     */
+    protected function setParameters(\ReflectionClass $reflection)
     {
-        $this->parameters = array();
-
-        $constructor = $this->reflection->getConstructor();
+        $constructor = $reflection->getConstructor();
 
         if (!$constructor) {
+            /* no parameters, nothing to do here */
             return;
         }
 
         foreach ($constructor->getParameters() as $parameter) {
-            $config = array();
+            $context = $this->getParameterContext($parameter);
 
-            if ($class = $parameter->getClass()) {
-                $config['type'] = '\\' . $class->getName();
+            if ($context) {
+                $this->parameters[] = new Parameter($context);
             }
-
-            if ($parameter->isOptional()) {
-                $config['value'] = $parameter->getDefaultValue();
-            }
-
-            $config['name'] = $parameter->getName();
-
-            $this->parameters[] = new Parameter($config);
         }
     }
 
-    protected function setMutators()
+    /**
+     * @param \ReflectionParameter $parameter
+     * @return array
+     * @throws DefinitionException
+     */
+    protected function getParameterContext(\ReflectionParameter $parameter)
     {
-        $this->mutators = array();
+        $context = array();
 
-        $methods = $this->reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
+        if ($class = $parameter->getClass()) {
+            $context['type'] = '\\' . $class->getName();
+        }
+        elseif ($parameter->isOptional()) {
+            $context['value'] = $parameter->getDefaultValue();
+        }
+        else {
+            // @todo(kampaw) better message
+            $name = $parameter->getName();
+            $msg = "Cannot create runtime definition, parameter $name is scalar";
+
+            throw new DefinitionException($msg);
+        }
+
+        return $context;
+    }
+
+    /**
+     * @param \ReflectionClass $reflection
+     */
+    protected function setMutators(\ReflectionClass $reflection)
+    {
+        $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
 
         foreach ($methods as $method) {
-            $config = array();
+            $context = $this->getMutatorContext($method);
 
-            $name = $method->getName();
-            $parameters = $method->getParameters();
-
-            if (strncasecmp($name, 'set', 3) <> 0) {
-                /* method name without a prefix, discard */
-                continue;
+            if ($context) {
+                $this->mutators[] = new Mutator($context);
             }
-
-            if (empty($parameters)) {
-                /* method with no parameters, discard */
-                continue;
-            }
-
-            if ($class = $parameters[0]->getClass()) {
-                $config['type'] = '\\' . $class->getName();
-            }
-
-            $config['name'] = lcfirst(substr($name, 3));
-
-            $this->mutators[] = new Mutator($config);
         }
+    }
+
+    /**
+     * @param \ReflectionMethod $method
+     * @return array|null
+     * @throws DefinitionException
+     */
+    protected function getMutatorContext(\ReflectionMethod $method)
+    {
+        $context = array();
+
+        $name = $method->getName();
+
+        if (!strncasecmp($name, 'set', 3)) {
+            $context['name'] = $name;
+        }
+        else {
+            /* method name without a prefix, discard */
+            return;
+        }
+
+        $parameters = $method->getParameters();
+
+        if (empty($parameters)) {
+            /* method with no parameters, discard */
+            return;
+        }
+        elseif ($class = $parameters[0]->getClass()) {
+            $context['type'] = '\\' . $class->getName();
+        }
+        else {
+            /* method takes a scalar parameter, discard */
+            return;
+        }
+
+        return $context;
     }
 }

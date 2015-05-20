@@ -1,9 +1,9 @@
 <?php
 
-namespace Kampaw\Dic\Component\Assembler;
+namespace Kampaw\Dic\Assembler;
 
 /**
- * @coversDefaultClass \Kampaw\Dic\Component\Assembler\SmartAssembler
+ * @coversDefaultClass \Kampaw\Dic\Assembler\SmartAssembler
  */
 class SmartAssemblerTest extends \PHPUnit_Framework_TestCase
 {
@@ -45,9 +45,9 @@ class SmartAssemblerTest extends \PHPUnit_Framework_TestCase
      * @covers ::getInstance
      * @uses \Kampaw\Dic\Component\Assembler\ReflectionAssembler
      */
-    public function GetInstance_ThreeConcreteParameters_ReturnsInstance()
+    public function GetInstance_MultipleConcreteParameters_ReturnsInstance()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ThreeConcreteParameters';
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\MultipleConcreteParameters';
 
         $arguments = array(
             new \stdClass(),

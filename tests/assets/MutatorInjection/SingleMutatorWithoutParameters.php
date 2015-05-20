@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Assets\MutatorInjection;
 
-class SingleMutatorNoParameters
+class SingleMutatorWithoutParameters
 {
     public function setNoParameters()
     {

@@ -2,22 +2,21 @@
 
 namespace Kampaw\Dic;
 
-use Kampaw\Dic\Definition\DefinitionContainer;
-use Kampaw\Dic\Definition\DefinitionInterface;
+use Kampaw\Dic\Assembler\AssemblerInterface;
+use Kampaw\Dic\Definition\AbstractDefinition;
+use Kampaw\Dic\Definition\ArrayDefinition;
+use Kampaw\Dic\Definition\AutowireMode;
+use Kampaw\Dic\Definition\DefinitionException;
+use Kampaw\Dic\Definition\RuntimeDefinition;
 use Kampaw\Dic\Definition\Parameter;
-use Kampaw\Dic\Component\Assembler\AssemblerInterface;
+use Kampaw\Dic\Exception\DependencyException;
 
-final class Container
+class Container
 {
     /**
-     * @var DefinitionContainer $definitions
+     * @var DefinitionRepository $definitions
      */
     protected $definitions;
-
-    /**
-     * @var \splObjectStorage $components
-     */
-    protected $components;
 
     /**
      * @var AssemblerInterface $assembler
@@ -30,12 +29,17 @@ final class Container
     protected $discovery;
 
     /**
+     * @var \SplStack $failsafe
+     */
+    protected $failsafe;
+
+    /**
      * @param array $config
      */
     public function __construct(array $config)
     {
-        $this->definitions = new DefinitionContainer();
-        $this->components = new \SplObjectStorage();
+        $this->definitions = new DefinitionRepository();
+        $this->failsafe = new \SplStack();
 
         $this->discovery = $config['discovery'];
         $this->assembler = $config['assembler'];
@@ -49,9 +53,16 @@ final class Container
      */
     public function get($type)
     {
-//        $definition = $this->getDefinition($type);
-//
-//        return $this->resolveDefinition($definition);
+        $definition = $this->getDefinition($type);
+
+        if (!$definition) {
+            $msg = "Definition for type $type is missing from repository. Provide valid definition "
+                . "in the configuration or enable automatic definition discovery";
+
+            throw new DefinitionException($msg, 0);
+        }
+
+        return $this->resolveDefinition($definition);
     }
 
     /**
@@ -63,105 +74,178 @@ final class Container
     }
 
     /**
-     * @param AssemblerInterface $type
+     * @param array $contexts
      */
-    protected function setAssembler(AssemblerInterface $type)
+    protected function setDefinitions(array $contexts)
     {
-        $this->assembler = $type;
-    }
+        foreach ($contexts as $context) {
+            $definition = new ArrayDefinition($context);
 
-    /**
-     * @param array $definitions
-     */
-    protected function setDefinitions(array $definitions)
-    {
-        foreach ($definitions as $definition) {
-//            $this->definitionContainer->insert($definition);
+            $this->definitions->insert($definition);
         }
     }
 
     /**
      * @param string $type
-     * @throws Exception\ComponentCreationException
-     * @return DefinitionInterface
+     * @return AbstractDefinition
      */
-    private function getDefinition($type)
+    protected function getDefinition($type)
     {
-//        if ($definition = $this->definitionContainer->getByType($type)) {
-//            return $definition;
-//        }
-//
-//        if (!$this->definitionFactory) {
-//            $msg = "DefinitionInterface $type missing from repository and cannot be resolved automatically. "
-//                 . "Enable auto discovery or provide valid definition in the configuration";
-//
-//            throw new Exception\ComponentCreationException($msg);
-//        }
-//
-//        if ($definition = $this->discoverDefinition($type)) {
-//            return $definition;
-//        }
+        if ($this->definitions->hasType($type)) {
+            $definition = $this->definitions->getByType($type);
+        }
+        elseif ($this->discovery) {
+            $definition = $this->discoverDefinition($type);
+        }
+        else {
+            $definition = null;
+        }
+
+        return $definition;
     }
 
     /**
-     * @param $type
-     * @throws Exception\DefinitionDiscoveryException
-     * @return DefinitionInterface
-     */
-    private function discoverDefinition($type)
-    {
-//        try {
-//            $definition = new RuntimeDefinition($type);
-//        } catch (\ReflectionException $e) {
-//            $parent = $type; // todo(kampaw) parent class in exception message
-//            $msg = "Auto discovery failed while instantiating $parent, definition for class $type "
-//                 . "cannot be constructed. Check $type constructor/mutators for typos and ensure that "
-//                 . "autoloader is correctly configured. Previous exception was: {$e->getMessage()}";
-//
-//            throw new Exception\DefinitionDiscoveryException($msg);
-//        }
-//
-//        $this->definitionContainer->insert($definition);
-//
-//        return $definition;
-    }
-
-    /**
-     * @param DefinitionInterface $definition
+     * @param AbstractDefinition $definition
      * @return object
      */
-    private function resolveDefinition(DefinitionInterface $definition)
+    protected function resolveDefinition(AbstractDefinition $definition)
     {
-//        $arguments = $this->getArguments($definition);
-//
-//        return $this->instanceFactory->getInstance($definition->getConcrete(), $arguments);
+        $this->failsafe->push($definition);
+
+        $arguments = $this->getArguments($definition);
+        $instance = $this->assembler->getInstance($definition->getConcrete(), $arguments);
+
+        return $instance;
     }
 
     /**
-     * @param DefinitionInterface $definition
-     * @returns object[]
+     * @param AbstractDefinition $definition
+     * @return object
      */
-    private function getArguments(DefinitionInterface $definition)
+    protected function resolveAutowiredDefinition(AbstractDefinition $definition)
     {
-//        $arguments = array();
-//
-//        $parameters = $definition->getParameters();
-//
-//        foreach ($parameters as $parameter) {
-//            $arguments[] = $this->getArgument($parameter);
-//        }
-//
-//        return $arguments;
+        if ($definition->isCandidate()) {
+            $instance = $this->resolveDefinition($definition);
+        }
+        else {
+            $concrete = $definition->getConcrete();
+            $msg = "Definition for type $concrete is excluded from autowiring. Remove override or "
+                . "explicitly set a reference to another definition";
+
+            throw new DependencyException($msg, 10);
+        }
+
+        return $instance;
+    }
+
+    /**
+     * @param string $type
+     * @return RuntimeDefinition
+     */
+    protected function discoverDefinition($type)
+    {
+        try {
+            $definition = new RuntimeDefinition($type);
+        } catch (\Exception $e) {
+            $msg = "Automatic discovery failed while creating a definition for type $type. Examine "
+                 . "class for errors and ensure that autoloader is correctly configured. See "
+                 . "previous exception for details";
+
+            throw new DefinitionException($msg, 10, $e);
+        }
+
+        $this->definitions->insert($definition);
+
+        return $definition;
+    }
+
+    /**
+     * @param AbstractDefinition $definition
+     * @return array
+     */
+    protected function getArguments(AbstractDefinition $definition)
+    {
+        $arguments = array();
+
+        foreach ($definition->getParameters() as $parameter) {
+            $arguments[] = $this->getArgument($parameter);
+        }
+
+        return $arguments;
     }
 
     /**
      * @param Parameter $parameter
-     * @returns object
+     * @return mixed
      */
-    private function getArgument(Parameter $parameter)
+    protected function getArgument(Parameter $parameter)
     {
-//        $definition = $this->getDefinition($parameter->getType());
-//
-//        return $this->resolveDefinition($definition);
+        if ($parameter->getRef()) {
+            $argument = $this->getArgumentByReference($parameter);
+        }
+        elseif ($parameter->getType()) {
+            $argument = $this->getArgumentByType($parameter);
+        }
+        elseif ($parameter->isOptional()) {
+            $argument = $parameter->getValue();
+        }
+        else {
+            $concrete = $this->failsafe->top()->getConcrete();
+            $msg = "Malformed parameter in definition $concrete. Parameter has no type nor default "
+                 . "value. Use ContainerBuilder API to manually create definitions and validate "
+                 . "external configuration files";
+
+            throw new DefinitionException($msg, 20);
+        }
+
+        return $argument;
+    }
+
+    /**
+     * @param Parameter $parameter
+     * @return object
+     */
+    protected function getArgumentByReference(Parameter $parameter)
+    {
+        $ref = $parameter->getRef();
+
+        if ($this->definitions->hasName($ref)) {
+            $definition = $this->definitions->getByName($ref);
+            $argument = $this->resolveDefinition($definition);
+        }
+        else {
+            $msg = "Invalid reference to definition $ref, no definition provided in configuration "
+                 . "matches requested name";
+
+            throw new DefinitionException($msg, 30);
+        }
+
+        return $argument;
+    }
+
+    /**
+     * @param Parameter $parameter
+     * @return object
+     */
+    protected function getArgumentByType(Parameter $parameter)
+    {
+        $definition = $this->getDefinition($parameter->getType());
+        $autowire = $this->failsafe->top()->getAutowire();
+
+        if ($definition && $autowire & AutowireMode::CONSTRUCTOR) {
+            $argument = $this->resolveAutowiredDefinition($definition);
+        }
+        elseif ($parameter->isOptional()) {
+            $argument = $parameter->getValue();
+        }
+        else {
+            $type = $parameter->getType();
+            $msg = "Parameter of type $type has no default value and couldn't be resolved though "
+                 . "autowiring. Specify a reference explicitly in the configuration";
+
+            throw new DependencyException($msg, 0);
+        }
+
+        return $argument;
     }
 }

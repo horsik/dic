@@ -1,6 +1,6 @@
 <?php
 
-namespace Kampaw\Dic\Component\Assembler;
+namespace Kampaw\Dic\Assembler;
 
 class ReflectionAssembler implements AssemblerInterface
 {

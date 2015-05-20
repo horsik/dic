@@ -1,23 +1,51 @@
 <?php
 
-namespace Kampaw\Dic\Definition;
+namespace Kampaw\Dic;
+
+use Kampaw\Dic\Definition\ArrayDefinition;
 
 /**
- * @coversDefaultClass \Kampaw\Dic\Definition\DefinitionContainer
+ * @coversDefaultClass \Kampaw\Dic\Definition\DefinitionRepository
  * @covers ::<!public>
  * @uses \Kampaw\Dic\Definition\ArrayDefinition
  * @uses \Kampaw\Dic\Definition\AbstractDefinition
  */
-class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
+class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var DefinitionContainer $container
+     * @var DefinitionRepository $container
      */
     private $container;
 
     public function setUp()
     {
-        $this->container = new DefinitionContainer();
+        $this->container = new DefinitionRepository();
+    }
+
+    /**
+     * @test
+     * @covers ::insert
+     * @covers ::hasType
+     */
+    public function HasType_ConcreteTypeRequestedMatchingConcreteDefinitionRegistered_ReturnsTrue()
+    {
+        $config['concrete'] = '\stdClass';
+
+        $definition = new ArrayDefinition($config);
+
+        $this->container->insert($definition);
+
+        $this->assertTrue($this->container->hasType('\stdClass'));
+    }
+
+    /**
+     * @test
+     * @covers ::insert
+     * @covers ::HasType
+     */
+    public function HasType_ConcreteTypeRequestedNoMatchingDefinitionsRegistered_ReturnsFalse()
+    {
+        $this->assertFalse($this->container->hasType('\stdClass'));
     }
 
     /**
@@ -34,16 +62,6 @@ class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
         $this->container->insert($definition);
 
         $this->assertSame($definition, $this->container->getByType('\stdClass'));
-    }
-
-    /**
-     * @test
-     * @covers ::insert
-     * @covers ::getByType
-     */
-    public function GetByType_ConcreteTypeRequestedNoMatchingDefinitionsRegistered_ReturnsNull()
-    {
-        $this->assertNull($this->container->getByType('\stdClass'));
     }
 
     /**
@@ -131,6 +149,32 @@ class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
     /**
      * @test
      * @covers ::insert
+     * @covers ::hasName
+     */
+    public function HasName_NameRequestedMatchingNamedDefinitionRegistered_ReturnsTrue()
+    {
+        $config['concrete'] = '\ArrayObject';
+        $config['name'] = 'requested_name';
+
+        $definition = new ArrayDefinition($config);
+        $this->container->insert($definition);
+
+        $this->assertTrue($this->container->hasName('requested_name'));
+    }
+
+    /**
+     * @test
+     * @covers ::insert
+     * @covers ::hasName
+     */
+    public function HasName_NameRequestedNoMatchingDefinitionsRegistered_ReturnsFalse()
+    {
+        $this->assertFalse($this->container->hasName('requested_name'));
+    }
+
+    /**
+     * @test
+     * @covers ::insert
      * @covers ::getByName
      */
     public function GetByName_NameRequestedMatchingNamedDefinitionRegistered_ReturnsDefinition()
@@ -142,16 +186,6 @@ class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
         $this->container->insert($definition);
 
         $this->assertSame($definition, $this->container->getByName('requested_name'));
-    }
-
-    /**
-     * @test
-     * @covers ::insert
-     * @covers ::getByName
-     */
-    public function GetByName_NameRequestedNoMatchingDefinitionsRegistered_ReturnsNull()
-    {
-        $this->assertNull($this->container->getByName('requested_name'));
     }
 
     /**
@@ -195,37 +229,5 @@ class DefinitionContainerTest extends \PHPUnit_Framework_TestCase
         $this->container->insert($definition2);
 
         $this->assertSame($definition1, $this->container->getByName('requested_name'));
-    }
-
-    /**
-     * @test
-     * @covers ::insert
-     * @covers ::getByType
-     */
-    public function GetByType_EmptyTypeRequestedMatchingAbstractDefinitionRegistered_ReturnsNull()
-    {
-        $config['concrete'] = '\ArrayObject';
-        $config['abstract'] = '';
-
-        $definition = new ArrayDefinition($config);
-        $this->container->insert($definition);
-
-        $this->assertNull($this->container->getByType(''));
-    }
-
-    /**
-     * @test
-     * @covers ::insert
-     * @covers ::getByName
-     */
-    public function GetByName_EmptyTypeRequestedMatchingNamedDefinitionRegistered_ReturnsNull()
-    {
-        $config['concrete'] = '\ArrayObject';
-        $config['name'] = '';
-
-        $definition = new ArrayDefinition($config);
-        $this->container->insert($definition);
-
-        $this->assertNull($this->container->getByName(''));
     }
 }

@@ -15,16 +15,11 @@ class Mutator
     protected $type;
 
     /**
-     * @var string $ref
+     * @param array $context
      */
-    protected $ref;
-
-    /**
-     * @param array $config
-     */
-    public function __construct(array $config)
+    public function __construct(array $context)
     {
-        foreach ($config as $key => $value) {
+        foreach ($context as $key => $value) {
             if (property_exists($this, $key)) {
                 $this->{$key} = $value;
             }
@@ -45,13 +40,5 @@ class Mutator
     public function getType()
     {
         return $this->type;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRef()
-    {
-        return $this->ref;
     }
 }

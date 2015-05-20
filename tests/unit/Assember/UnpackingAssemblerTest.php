@@ -1,9 +1,9 @@
 <?php
 
-namespace Kampaw\Dic\Component\Assembler;
+namespace Kampaw\Dic\Assembler;
 
 /**
- * @coversDefaultClass Kampaw\Dic\Component\Assembler\UnpackingAssembler
+ * @coversDefaultClass Kampaw\Dic\Assembler\UnpackingAssembler
  */
 class UnpackingAssemblerTest extends \PHPUnit_Framework_TestCase
 {

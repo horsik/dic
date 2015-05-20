@@ -1,9 +1,9 @@
 <?php
 
-namespace Kampaw\Dic\Component\Assembler;
+namespace Kampaw\Dic\Assembler;
 
 /**
- * @coversDefaultClass \Kampaw\Dic\Component\Assembler\ReflectionAssembler
+ * @coversDefaultClass \Kampaw\Dic\Assembler\ReflectionAssembler
  */
 class ReflectionAssemblerTest extends \PHPUnit_Framework_TestCase
 {

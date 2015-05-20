@@ -5,11 +5,6 @@ namespace Kampaw\Dic\Definition;
 class Parameter
 {
     /**
-     * @var string $name
-     */
-    protected $name;
-
-    /**
      * @var string $type
      */
     protected $type;
@@ -30,23 +25,17 @@ class Parameter
     protected $optional;
 
     /**
-     * @param array $config
+     * @param array $context
      */
-    public function __construct(array $config)
+    public function __construct(array $context)
     {
-        foreach ($config as $key => $value) {
+        foreach ($context as $key => $value) {
             if (property_exists($this, $key)) {
                 $this->{$key} = $value;
             }
         }
-    }
 
-    /**
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
+        $this->optional = array_key_exists('value', $context);
     }
 
     /**
@@ -74,19 +63,10 @@ class Parameter
     }
 
     /**
-     * @return bool
+     * @return boolean
      */
     public function isOptional()
     {
         return $this->optional;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    protected function setValue($value)
-    {
-        $this->value = $value;
-        $this->optional = true;
     }
 }

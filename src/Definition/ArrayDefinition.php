@@ -14,25 +14,29 @@ class ArrayDefinition extends AbstractDefinition
                 $this->{$key} = $value;
             }
         }
+
+        $this->parameters = $this->compileParameters($this->parameters);
     }
 
     /**
      * @param array $parameters
+     * @return Parameter[]
      */
-    protected function setParameters($parameters)
+    protected function compileParameters(array $parameters)
     {
-        foreach ($parameters as $parameter) {
-            $this->parameters[] = new Parameter($parameter);
+        foreach ($parameters as &$context) {
+            $context = new Parameter($context);
         }
+
+        return $parameters;
     }
 
     /**
      * @param array $mutators
+     * @return Mutator[]
      */
-    protected function setMutators(array $mutators)
+    protected function compileMutators(array $mutators)
     {
-        foreach ($mutators as $mutator) {
-            $this->mutators[] = new Mutator($mutator);
-        }
+        // @todo(kampaw) implement complieMutators
     }
 }

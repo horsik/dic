@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Definition;
 
-abstract class AbstractDefinition implements DefinitionInterface
+abstract class AbstractDefinition
 {
     /**
      * @var string $concrete
@@ -22,27 +22,27 @@ abstract class AbstractDefinition implements DefinitionInterface
     /**
      * @var Parameter[] $parameters
      */
-    protected $parameters;
+    protected $parameters = array();
 
     /**
-     * @var Mutator[] $mutators
+     * @var Parameter[] $mutators
      */
-    protected $mutators;
+    protected $mutators = array();
 
     /**
      * @var string $lifetime
      */
-    protected $lifetime;
+    protected $lifetime = 'transient';
 
     /**
      * @var string $autowire
      */
-    protected $autowire;
+    protected $autowire = AutowireMode::AUTODETECT;
 
     /**
      * @var bool $candidate
      */
-    protected $candidate;
+    protected $candidate = true;
 
     /**
      * @return string
@@ -77,7 +77,7 @@ abstract class AbstractDefinition implements DefinitionInterface
     }
 
     /**
-     * @return Mutator[]
+     * @return Parameter[]
      */
     public function getMutators()
     {

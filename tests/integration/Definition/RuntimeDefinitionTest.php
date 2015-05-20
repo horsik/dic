@@ -14,9 +14,8 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @test
-     * @covers ::getConcrete
      */
-    public function GetConcrete_ClassExists_ReturnsDefinition()
+    public function Construct_ValidClass_ReturnsDefinition()
     {
         $result = new RuntimeDefinition('\stdClass');
 
@@ -25,9 +24,8 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getParameters
      */
-    public function GetParameters_NoConstructor_NoParameters()
+    public function Construct_ClassWithoutConstructor_ReturnsDefinitionWithoutParameters()
     {
         $result = new RuntimeDefinition('\stdClass');
 
@@ -36,9 +34,8 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getParameters
      */
-    public function GetParameters_SingleConstructorParameter_CorrectParameterCount()
+    public function Construct_SingleConstructorParameter_ReturnsDefinitionWithOneParameter()
     {
         $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
         $result = new RuntimeDefinition($asset);
@@ -48,33 +45,19 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getParameters
      */
-    public function GetParameters_MultipleConstructorParameters_CorrectParameterCount()
+    public function Construct_MultipleConstructorParameters_ReturnsDefinitionWithMultipleParameters()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteAndScalarParameter';
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\MultipleConcreteParameters';
         $result = new RuntimeDefinition($asset);
 
-        $this->assertCount(2, $result->getParameters());
+        $this->assertCount(3, $result->getParameters());
     }
 
     /**
      * @test
-     * @covers ::getParameters
      */
-    public function GetParameters_SingleConstructorParameter_CorrectParameterName()
-    {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
-        $result = new RuntimeDefinition($asset);
-
-        $this->assertSame('concrete', $result->getParameters()[0]->getName());
-    }
-
-    /**
-     * @test
-     * @covers ::getParameters
-     */
-    public function GetParameters_SingleConstructorParameter_CorrectParameterType()
+    public function Construct_SingleConstructorParameter_ReturnsDefinitionWithCorrectParameterType()
     {
         $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
         $result = new RuntimeDefinition($asset);
@@ -84,24 +67,20 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getParameters
+     * @expectedException \Kampaw\Dic\Definition\DefinitionException
      */
-    public function GetParameters_ConcreteAndScalarConstructorParameter_CorrectParameterTypes()
+    public function Construct_ScalarConstructorParameter_ThrowsException()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteAndScalarParameter';
-        $result = new RuntimeDefinition($asset);
-
-        $this->assertSame('\stdClass', $result->getParameters()[0]->getType());
-        $this->assertNull($result->getParameters()[1]->getType());
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ScalarParameter';
+        new RuntimeDefinition($asset);
     }
 
     /**
      * @test
-     * @covers ::getParameters
      */
-    public function GetParameters_ConstructorParameterWithDefaultValue_CorrectParameterValue()
+    public function Construct_ScalarConstructorParameterWithDefaultValue_ReturnsDefinitionWithCorrectParameterValue()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ParameterWithDefaultValue';
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ScalarParameterWithDefaultValue';
         $result = new RuntimeDefinition($asset);
 
         $this->assertSame('default', $result->getParameters()[0]->getValue());
@@ -109,9 +88,8 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getMutators
      */
-    public function GetMutators_StdClassAsSubject_EmptyMutators()
+    public function Construct_ClassWithoutMutators_ReturnsDefinitionWithoutMutators()
     {
         $result = new RuntimeDefinition('\stdClass');
 
@@ -120,11 +98,10 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getMutators
      */
-    public function GetMutators_SingleMutatorNoParameters_ReturnsEmptyArray()
+    public function Construct_SingleMutatorWithoutParameters_ReturnsDefinitionWithoutMutators()
     {
-        $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorNoParameters';
+        $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorWithoutParameters';
         $result = new RuntimeDefinition($asset);
 
         $this->assertCount(0, $result->getMutators());
@@ -132,25 +109,34 @@ class RuntimeDefinitionTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
-     * @covers ::getMutators
      */
-    public function GetMutators_SingleMutatorScalarParameter_ReturnsCorrectName()
+    public function Construct_SingleMutatorWithScalarParameter_ReturnsDefinitionWithoutMutators()
     {
         $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorScalarParameter';
         $result = new RuntimeDefinition($asset);
 
-        $this->assertSame('scalar', $result->getMutators()[0]->getName());
+        $this->assertCount(0, $result->getMutators());
     }
 
     /**
      * @test
-     * @covers ::getMutators
+     * @expectedException \Kampaw\Dic\Definition\DefinitionException
      */
-    public function GetMutators_SingleMutatorConcreteParameter_ReturnsCorrectName()
+    public function Construct_ClassWithPrivateConstructor_ThrowsException()
     {
-        $asset = '\Kampaw\Dic\Assets\MutatorInjection\SingleMutatorConcreteParameter';
-        $result = new RuntimeDefinition($asset);
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\PrivateConstructor';
 
-        $this->assertSame('concrete', $result->getMutators()[0]->getName());
+        new RuntimeDefinition($asset);
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Definition\DefinitionException
+     */
+    public function Construct_AbstractClass_ThrowsException()
+    {
+        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\AbstractClass';
+
+        new RuntimeDefinition($asset);
     }
 }

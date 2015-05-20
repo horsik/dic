@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Assets\ConstructorInjection;
 
-class ParameterWithDefaultValue
+class ScalarParameterWithDefaultValue
 {
     public function __construct($optional = 'default')
     {
