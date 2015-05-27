@@ -7,7 +7,7 @@ use Kampaw\Dic\Definition\ArrayDefinition;
 /**
  * @coversDefaultClass \Kampaw\Dic\Definition\DefinitionRepository
  * @covers ::<!public>
- * @uses \Kampaw\Dic\Definition\ArrayDefinition
+ * @uses \Kampaw\Dic\DefinitionArrayDefinition
  * @uses \Kampaw\Dic\Definition\AbstractDefinition
  */
 class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
@@ -29,13 +29,13 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function HasType_ConcreteTypeRequestedMatchingConcreteDefinitionRegistered_ReturnsTrue()
     {
-        $config['concrete'] = '\stdClass';
+        $config['concrete'] = 'stdClass';
 
         $definition = new ArrayDefinition($config);
 
         $this->container->insert($definition);
 
-        $this->assertTrue($this->container->hasType('\stdClass'));
+        $this->assertTrue($this->container->hasType('stdClass'));
     }
 
     /**
@@ -45,7 +45,7 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function HasType_ConcreteTypeRequestedNoMatchingDefinitionsRegistered_ReturnsFalse()
     {
-        $this->assertFalse($this->container->hasType('\stdClass'));
+        $this->assertFalse($this->container->hasType('stdClass'));
     }
 
     /**
@@ -55,13 +55,13 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByType_ConcreteTypeRequestedMatchingConcreteDefinitionRegistered_ReturnsDefinition()
     {
-        $config['concrete'] = '\stdClass';
+        $config['concrete'] = 'stdClass';
 
         $definition = new ArrayDefinition($config);
 
         $this->container->insert($definition);
 
-        $this->assertSame($definition, $this->container->getByType('\stdClass'));
+        $this->assertSame($definition, $this->container->getByType('stdClass'));
     }
 
     /**
@@ -71,7 +71,7 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByType_ConcreteTypeRequestedMultipleMatchingDefinitionsRegistered_ReturnsFirstRegistered()
     {
-        $config['concrete'] = '\stdClass';
+        $config['concrete'] = 'stdClass';
 
         $definition1 = new ArrayDefinition($config);
         $definition2 = new ArrayDefinition($config);
@@ -79,7 +79,7 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->container->insert($definition1);
         $this->container->insert($definition2);
 
-        $this->assertSame($definition1, $this->container->getByType('\stdClass'));
+        $this->assertSame($definition1, $this->container->getByType('stdClass'));
     }
 
     /**
@@ -89,19 +89,19 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByType_DifferentConcreteTypesRequestedMatchingDefinitionsRegistered_ReturnsDefinitions()
     {
-        $config1['concrete'] = '\ArrayObject';
+        $config1['concrete'] = 'ArrayObject';
 
         $definition1 = new ArrayDefinition($config1);
 
-        $config2['concrete'] = '\ArrayIterator';
+        $config2['concrete'] = 'ArrayIterator';
 
         $definition2 = new ArrayDefinition($config2);
 
         $this->container->insert($definition1);
         $this->container->insert($definition2);
 
-        $this->assertSame($definition1, $this->container->getByType('\ArrayObject'));
-        $this->assertSame($definition2, $this->container->getByType('\ArrayIterator'));
+        $this->assertSame($definition1, $this->container->getByType('ArrayObject'));
+        $this->assertSame($definition2, $this->container->getByType('ArrayIterator'));
 
     }
 
@@ -112,13 +112,13 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByType_AbstractTypeRequestedMatchingDefinitionRegistered_ReturnsDefinition()
     {
-        $config['concrete'] = '\ArrayObject';
-        $config['abstract'] = '\ArrayAccess';
+        $config['concrete'] = 'ArrayObject';
+        $config['abstract'] = 'ArrayAccess';
 
         $definition = new ArrayDefinition($config);
         $this->container->insert($definition);
 
-        $this->assertSame($definition, $this->container->getByType('\ArrayAccess'));
+        $this->assertSame($definition, $this->container->getByType('ArrayAccess'));
     }
 
     /**
@@ -128,22 +128,22 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByType_AbstractTypeRequestedMultipleMatchingDefinitionsRegistered_ReturnsFirstRegistered()
     {
-        $config1['concrete'] = '\ArrayObject';
-        $config1['abstract'] = '\ArrayAccess';
+        $config1['concrete'] = 'ArrayObject';
+        $config1['abstract'] = 'ArrayAccess';
 
         $definition1 = new ArrayDefinition($config1);
 
-        $config2['concrete'] = '\ArrayIterator';
-        $config2['abstract'] = '\ArrayAccess';
+        $config2['concrete'] = 'ArrayIterator';
+        $config2['abstract'] = 'ArrayAccess';
 
         $definition2 = new ArrayDefinition($config2);
 
         $this->container->insert($definition1);
         $this->container->insert($definition2);
 
-        $this->assertSame($definition1, $this->container->getByType('\ArrayAccess'));
-        $this->assertSame($definition1, $this->container->getByType('\ArrayObject'));
-        $this->assertSame($definition2, $this->container->getByType('\ArrayIterator'));
+        $this->assertSame($definition1, $this->container->getByType('ArrayAccess'));
+        $this->assertSame($definition1, $this->container->getByType('ArrayObject'));
+        $this->assertSame($definition2, $this->container->getByType('ArrayIterator'));
     }
 
     /**
@@ -153,7 +153,7 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function HasName_NameRequestedMatchingNamedDefinitionRegistered_ReturnsTrue()
     {
-        $config['concrete'] = '\ArrayObject';
+        $config['concrete'] = 'ArrayObject';
         $config['name'] = 'requested_name';
 
         $definition = new ArrayDefinition($config);
@@ -179,7 +179,7 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByName_NameRequestedMatchingNamedDefinitionRegistered_ReturnsDefinition()
     {
-        $config['concrete'] = '\ArrayObject';
+        $config['concrete'] = 'ArrayObject';
         $config['name'] = 'requested_name';
 
         $definition = new ArrayDefinition($config);
@@ -195,12 +195,12 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByName_DifferentNamesRequestedMatchingDefinitionsRegistered_ReturnsDefinitions()
     {
-        $config1['concrete'] = '\ArrayObject';
+        $config1['concrete'] = 'ArrayObject';
         $config1['name'] = 'first_name';
 
         $definition1 = new ArrayDefinition($config1);
 
-        $config2['concrete'] = '\ArrayIterator';
+        $config2['concrete'] = 'ArrayIterator';
         $config2['name'] = 'second_name';
 
         $definition2 = new ArrayDefinition($config2);
@@ -219,7 +219,7 @@ class DefinitionRepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function GetByName_NameRequestedMultipleMatchingDefinitionsRegistered_ReturnsFirstRegistered()
     {
-        $config['concrete'] = '\ArrayObject';
+        $config['concrete'] = 'ArrayObject';
         $config['name'] = 'requested_name';
 
         $definition1 = new ArrayDefinition($config);

@@ -2,7 +2,7 @@
 
 namespace Kampaw\Dic\Assets\MutatorInjection;
 
-class SingleMutatorScalarParameter
+class ScalarParameter
 {
     public function setScalar($scalar)
     {

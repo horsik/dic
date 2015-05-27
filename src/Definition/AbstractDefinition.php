@@ -25,7 +25,7 @@ abstract class AbstractDefinition
     protected $parameters = array();
 
     /**
-     * @var Parameter[] $mutators
+     * @var Mutator[] $mutators
      */
     protected $mutators = array();
 
@@ -77,7 +77,7 @@ abstract class AbstractDefinition
     }
 
     /**
-     * @return Parameter[]
+     * @return Mutator[]
      */
     public function getMutators()
     {

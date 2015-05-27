@@ -23,9 +23,9 @@ class SmartAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function GetInstance_ClassWithNoArguments_ReturnsInstance()
     {
-        $result = $this->factory->getInstance('\stdClass');
+        $result = $this->factory->getInstance('stdClass');
 
-        $this->assertInstanceOf('\stdClass', $result);
+        $this->assertInstanceOf('stdClass', $result);
     }
 
     /**
@@ -34,7 +34,7 @@ class SmartAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function GetInstance_ConcreteDependency_ReturnsInstance()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
         $result = $this->factory->getInstance($asset, array(new \stdClass()));
 
         $this->assertInstanceOf($asset, $result);
@@ -47,7 +47,7 @@ class SmartAssemblerTest extends \PHPUnit_Framework_TestCase
      */
     public function GetInstance_MultipleConcreteParameters_ReturnsInstance()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\MultipleConcreteParameters';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\MultipleConcreteParameters';
 
         $arguments = array(
             new \stdClass(),

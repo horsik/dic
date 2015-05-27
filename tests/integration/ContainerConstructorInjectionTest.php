@@ -22,7 +22,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithoutParametersMatchingDefinitionRegisteredDiscoveryFalse_ReturnsInstance()
     {
-        $definition['concrete'] = '\stdClass';
+        $definition['concrete'] = 'stdClass';
 
         $config['assembler'] = new SmartAssembler();
         $config['discovery'] = false;
@@ -30,7 +30,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $container = new Container($config);
 
-        $this->assertInstanceOf('\stdClass', $container->get('\stdClass'));
+        $this->assertInstanceOf('stdClass', $container->get('stdClass'));
     }
 
     /**
@@ -45,7 +45,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
         $config['definitions'] = array();
 
         $container = new Container($config);
-        $container->get('\stdClass');
+        $container->get('stdClass');
     }
 
     /**
@@ -59,7 +59,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $container = new Container($config);
 
-        $this->assertInstanceOf('\stdClass', $container->get('\stdClass'));
+        $this->assertInstanceOf('stdClass', $container->get('stdClass'));
     }
 
     /**
@@ -69,7 +69,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithPrivateConstructorNoMatchingDefinitionRegisteredDiscoveryTrue_ThrowsException()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\PrivateConstructor';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\PrivateConstructor';
 
         $config['assembler'] = new SmartAssembler();
         $config['discovery'] = true;
@@ -84,7 +84,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithScalarParameterWithDefaultValueMatchingDefinitionRegisteredDiscoveryFalse_ReturnsInstance()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ScalarParameterWithDefaultValue';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ScalarParameterWithDefaultValue';
 
         $parameter['value'] = 'default';
 
@@ -107,7 +107,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithScalarParameterWithoutDefaultValueMatchingMalformedDefinitionRegisteredDiscoveryFalse_ThrowsException()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ScalarParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ScalarParameter';
 
         $definition['concrete'] = $asset;
         $definition['parameters'][] = array();
@@ -125,14 +125,14 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithExplicitConcreteParameterMatchingDefinitionsRegistered_ReturnsInstance()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
         $parameter['ref'] = 'dependency';
 
         $definition1['concrete'] = $asset;
         $definition1['parameters'][] = $parameter;
 
-        $definition2['concrete'] = '\stdClass';
+        $definition2['concrete'] = 'stdClass';
         $definition2['name'] = 'dependency';
 
         $config['assembler'] = new SmartAssembler();
@@ -151,7 +151,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithExplicitConcreteParameterNoMatchingDependencyDefinitionRegistered_ThrowsException()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
         $parameter['ref'] = 'dependency';
 
@@ -182,15 +182,15 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeConcreteParameterMatchingDefinitionsRegisteredParameterNotResolvedByAutowire_ThrowsException($autowire)
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
-        $parameter['type'] = '\stdClass';
+        $parameter['type'] = 'stdClass';
 
         $definition1['concrete'] = $asset;
         $definition1['autowire'] = $autowire;
         $definition1['parameters'][] = $parameter;
 
-        $definition2['concrete'] = '\stdClass';
+        $definition2['concrete'] = 'stdClass';
 
         $config['assembler'] = new SmartAssembler();
         $config['discovery'] = false;
@@ -214,15 +214,15 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeConcreteParameterMatchingDefinitionsRegisteredParameterResolvedByAutowireDiscoveryFalse_ReturnsInstance($autowire)
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
-        $parameter['type'] = '\stdClass';
+        $parameter['type'] = 'stdClass';
 
         $definition1['concrete'] = $asset;
         $definition1['autowire'] = $autowire;
         $definition1['parameters'][] = $parameter;
 
-        $definition2['concrete'] = '\stdClass';
+        $definition2['concrete'] = 'stdClass';
 
         $config['assembler'] = new SmartAssembler();
         $config['discovery'] = false;
@@ -241,9 +241,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeConcreteParameterNoMatchingParameterDefinitionRegisteredResolvedByAutowireDiscoveryFalse_ThrowsException($autowire)
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
-        $parameter['type'] = '\stdClass';
+        $parameter['type'] = 'stdClass';
 
         $definition['concrete'] = $asset;
         $definition['autowire'] = $autowire;
@@ -263,9 +263,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeConcreteParameterNoMatchingParameterDefinitionRegisteredResolvedByAutowireDiscoveryTrue_ReturnsInstance($autowire)
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
-        $parameter['type'] = '\stdClass';
+        $parameter['type'] = 'stdClass';
 
         $definition['concrete'] = $asset;
         $definition['autowire'] = $autowire;
@@ -285,9 +285,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeWithConcreteParameterWithDefaultValueNoMatchingParameterDefinitionRegisteredDiscoveryFalse_ReturnsInstance()
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameterWithDefaultValue';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameterWithDefaultValue';
 
-        $parameter['type'] = '\stdClass';
+        $parameter['type'] = 'stdClass';
         $parameter['value'] = null;
 
         $definition['concrete'] = $asset;
@@ -310,15 +310,15 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
      */
     public function Get_ConcreteTypeConcreteParameterMatchingDefinitionsRegisteredParameterResolvedByAutowireDefinitionCandidateFalse_ThrowsException($autowire)
     {
-        $asset = '\Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\ConcreteParameter';
 
-        $parameter['type'] = '\stdClass';
+        $parameter['type'] = 'stdClass';
 
         $definition1['concrete'] = $asset;
         $definition1['autowire'] = $autowire;
         $definition1['parameters'][] = $parameter;
 
-        $definition2['concrete'] = '\stdClass';
+        $definition2['concrete'] = 'stdClass';
         $definition2['candidate'] = false;
 
         $config['assembler'] = new SmartAssembler();
@@ -327,5 +327,50 @@ class ContainerTest extends \PHPUnit_Framework_TestCase
 
         $container = new Container($config);
         $container->get($asset);
+    }
+
+    /**
+     * @test
+     * @expectedException \Kampaw\Dic\Exception\DependencyException
+     * @expectedExceptionCode 20
+     */
+    public function Get_ConcreteTypeCircularConcreteParameterMatchingDefinitionRegisteredDiscoveryFalse_ThrowsException()
+    {
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\CircularConcreteParameter';
+
+        $parameter['type'] = $asset;
+
+        $definition['concrete'] = $asset;
+        $definition['parameters'][] = $parameter;
+
+        $config['assembler'] = new SmartAssembler();
+        $config['discovery'] = false;
+        $config['definitions'][] = $definition;
+
+        $container = new Container($config);
+        $container->get($asset);
+    }
+
+    /**
+     * @test
+     */
+    public function Get_ConcreteTypeMultipleConcreteParametersMatchingDefinitionsRegisteredDiscoveryFalse_ReturnsInstance()
+    {
+        $asset = 'Kampaw\Dic\Assets\ConstructorInjection\MultipleConcreteParameters';
+
+        $parameter['type'] = 'stdClass';
+
+        $definition1['concrete'] = $asset;
+        $definition1['parameters'] = array($parameter, $parameter, $parameter);
+
+        $definition2['concrete'] = 'stdClass';
+
+        $config['assembler'] = new SmartAssembler();
+        $config['discovery'] = false;
+        $config['definitions'] = array($definition1, $definition2);
+
+        $container = new Container($config);
+
+        $this->assertInstanceOf($asset, $container->get($asset));
     }
 }

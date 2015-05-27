@@ -16,6 +16,7 @@ class ArrayDefinition extends AbstractDefinition
         }
 
         $this->parameters = $this->compileParameters($this->parameters);
+        $this->mutators = $this->compileMutators($this->mutators);
     }
 
     /**
@@ -37,6 +38,10 @@ class ArrayDefinition extends AbstractDefinition
      */
     protected function compileMutators(array $mutators)
     {
-        // @todo(kampaw) implement complieMutators
+        foreach ($mutators as &$context) {
+            $context = new Mutator($context);
+        }
+
+        return $mutators;
     }
 }

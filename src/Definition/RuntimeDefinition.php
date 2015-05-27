@@ -12,7 +12,9 @@ class RuntimeDefinition extends AbstractDefinition
         $reflection = new \ReflectionClass($class);
 
         if (!$reflection->isInstantiable()) {
-            throw new DefinitionException("Class $class is not instantiable");
+            $msg = "Unable to create a runtime definition for $class, class is not instantiable";
+
+            throw new DefinitionException($msg);
         }
 
         $this->setConcrete($reflection);
@@ -25,7 +27,7 @@ class RuntimeDefinition extends AbstractDefinition
      */
     protected function setConcrete(\ReflectionClass $reflection)
     {
-        $this->concrete = '\\' . $reflection->getName();
+        $this->concrete = $reflection->getName();
     }
 
     /**
@@ -46,30 +48,32 @@ class RuntimeDefinition extends AbstractDefinition
             if ($context) {
                 $this->parameters[] = new Parameter($context);
             }
+            else {
+                $name = $parameter->getName();
+                $concrete = $reflection->getName();
+
+                $msg = "Unable to create a runtime definition for $concrete, constructor parameter "
+                     . "$name is scalar and have no default value";
+
+                throw new DefinitionException($msg);
+            }
         }
     }
 
     /**
      * @param \ReflectionParameter $parameter
      * @return array
-     * @throws DefinitionException
      */
     protected function getParameterContext(\ReflectionParameter $parameter)
     {
         $context = array();
 
         if ($class = $parameter->getClass()) {
-            $context['type'] = '\\' . $class->getName();
+            $context['type'] = $class->getName();
         }
-        elseif ($parameter->isOptional()) {
-            $context['value'] = $parameter->getDefaultValue();
-        }
-        else {
-            // @todo(kampaw) better message
-            $name = $parameter->getName();
-            $msg = "Cannot create runtime definition, parameter $name is scalar";
 
-            throw new DefinitionException($msg);
+        if ($parameter->isOptional()) {
+            $context['value'] = $parameter->getDefaultValue();
         }
 
         return $context;
@@ -101,27 +105,14 @@ class RuntimeDefinition extends AbstractDefinition
         $context = array();
 
         $name = $method->getName();
-
-        if (!strncasecmp($name, 'set', 3)) {
-            $context['name'] = $name;
-        }
-        else {
-            /* method name without a prefix, discard */
-            return;
-        }
-
         $parameters = $method->getParameters();
 
-        if (empty($parameters)) {
-            /* method with no parameters, discard */
-            return;
-        }
-        elseif ($class = $parameters[0]->getClass()) {
-            $context['type'] = '\\' . $class->getName();
-        }
-        else {
-            /* method takes a scalar parameter, discard */
-            return;
+        if (!strncasecmp($name, 'set', 3) &&
+            count($parameters) === 1 &&
+            $class = $parameters[0]->getClass()
+        ) {
+            $context['name'] = $name;
+            $context['type'] = $class->getName();
         }
 
         return $context;
