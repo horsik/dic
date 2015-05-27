@@ -15,33 +15,27 @@ class ArrayDefinition extends AbstractDefinition
             }
         }
 
-        $this->parameters = $this->compileParameters($this->parameters);
-        $this->mutators = $this->compileMutators($this->mutators);
+        $this->compileParameters($this->parameters);
+        $this->compileMutators($this->mutators);
     }
 
     /**
      * @param array $parameters
-     * @return Parameter[]
      */
-    protected function compileParameters(array $parameters)
+    protected function compileParameters(array &$parameters)
     {
         foreach ($parameters as &$context) {
             $context = new Parameter($context);
         }
-
-        return $parameters;
     }
 
     /**
      * @param array $mutators
-     * @return Mutator[]
      */
-    protected function compileMutators(array $mutators)
+    protected function compileMutators(array &$mutators)
     {
         foreach ($mutators as &$context) {
             $context = new Mutator($context);
         }
-
-        return $mutators;
     }
 }
